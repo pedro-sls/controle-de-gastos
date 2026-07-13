@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(16);
+select plan(22);
 
 select is(
   (
@@ -77,11 +77,33 @@ select is(
   'derived views execute with invoker security'
 );
 
+select is(
+  has_table_privilege('authenticated', 'public.transfers', 'INSERT'),
+  false,
+  'authenticated cannot insert transfer parents directly'
+);
+
+select is(
+  has_table_privilege('authenticated', 'public.categories', 'DELETE'),
+  false,
+  'authenticated cannot permanently delete categories'
+);
+
 insert into auth.users (id, email, raw_user_meta_data)
 values (
   '10000000-0000-0000-0000-000000000001',
   'provisioning@example.test',
   '{"full_name":"Provisioned User"}'::jsonb
+);
+
+insert into auth.users (id, email, raw_user_meta_data)
+values (
+  '10000000-0000-0000-0000-000000000002',
+  'safe-metadata@example.test',
+  jsonb_build_object(
+    'full_name', repeat('N', 200),
+    'avatar_url', repeat('A', 3000)
+  )
 );
 
 select is(
@@ -112,6 +134,37 @@ select is(
   ),
   'BRL|pt-BR|America/Fortaleza'::text,
   'default financial settings are provisioned'
+);
+
+select is(
+  (
+    select char_length(full_name)
+    from public.profiles
+    where id = '10000000-0000-0000-0000-000000000002'
+  ),
+  120,
+  'oversized display names are safely bounded during signup'
+);
+
+select is(
+  (
+    select avatar_url
+    from public.profiles
+    where id = '10000000-0000-0000-0000-000000000002'
+  ),
+  null::text,
+  'oversized avatar metadata cannot abort signup'
+);
+
+select throws_ok(
+  $$
+    update public.user_settings
+    set timezone = 'Mars/Olympus'
+    where user_id = '10000000-0000-0000-0000-000000000001'
+  $$,
+  '22023',
+  null,
+  'unknown timezones are rejected'
 );
 
 select is(
@@ -155,6 +208,20 @@ select is(
   ),
   18::bigint,
   'all provisioned categories are marked as defaults'
+);
+
+select throws_ok(
+  $$
+    insert into public.categories (user_id, name, type)
+    values (
+      '10000000-0000-0000-0000-000000000001',
+      ' Outros ',
+      'expense'
+    )
+  $$,
+  '23505',
+  null,
+  'category uniqueness ignores surrounding whitespace'
 );
 
 insert into public.accounts (

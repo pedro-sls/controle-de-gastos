@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(19);
+select plan(20);
 
 insert into auth.users (id, email)
 values
@@ -184,6 +184,23 @@ select is(
   450.00::numeric,
   'the destination balance reflects the updated amount'
 );
+
+reset role;
+
+select throws_ok(
+  $$
+    update public.transactions
+    set transfer_id = '33000000-0000-0000-0000-000000000001'
+    where transfer_id = (select transfer_id from transfer_test_state)
+      and type = 'transfer_out'
+  $$,
+  '23514',
+  null,
+  'even privileged writes cannot reassign a transfer leg'
+);
+
+set local role authenticated;
+set local request.jwt.claim.sub = '30000000-0000-0000-0000-000000000001';
 
 select throws_ok(
   $$

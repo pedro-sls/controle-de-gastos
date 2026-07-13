@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(15);
+select plan(16);
 
 insert into auth.users (id, email)
 values
@@ -119,6 +119,44 @@ select is(
   (select count(*) from public.account_balances),
   2::bigint,
   'security-invoker balance view only exposes user A accounts'
+);
+
+update public.accounts
+set archived_at = statement_timestamp()
+where id = '21000000-0000-0000-0000-000000000003';
+
+select throws_ok(
+  $$
+    insert into public.transactions (
+      user_id,
+      account_id,
+      category_id,
+      description,
+      amount,
+      type,
+      transaction_date,
+      status,
+      payment_method
+    )
+    select
+      '20000000-0000-0000-0000-000000000001',
+      '21000000-0000-0000-0000-000000000003',
+      category.id,
+      'Blocked archived account',
+      10,
+      'expense',
+      current_date,
+      'pending',
+      'pix'
+    from public.categories as category
+    where category.user_id = '20000000-0000-0000-0000-000000000001'
+      and category.type = 'expense'
+    order by category.id
+    limit 1
+  $$,
+  '23514',
+  null,
+  'new transactions cannot use an archived account'
 );
 
 select is_empty(
