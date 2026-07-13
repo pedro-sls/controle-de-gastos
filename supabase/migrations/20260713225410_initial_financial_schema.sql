@@ -133,7 +133,7 @@ create table public.accounts (
 alter table public.accounts enable row level security;
 
 create unique index accounts_active_name_unique_idx
-  on public.accounts (user_id, lower(name))
+  on public.accounts (user_id, lower(btrim(name)))
   where archived_at is null;
 
 create index accounts_user_archived_idx
@@ -166,7 +166,7 @@ create table public.categories (
 alter table public.categories enable row level security;
 
 create unique index categories_active_name_unique_idx
-  on public.categories (user_id, type, lower(name))
+  on public.categories (user_id, type, lower(btrim(name)))
   where archived_at is null;
 
 create index categories_user_type_archived_idx
@@ -540,6 +540,190 @@ for each row execute function private.set_audit_timestamps();
 create trigger financial_goals_set_audit_timestamps
 before insert or update on public.financial_goals
 for each row execute function private.set_audit_timestamps();
+
+create function private.validate_user_settings_timezone()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not exists (
+    select 1
+    from pg_catalog.pg_timezone_names
+    where name = new.timezone
+  ) then
+    raise exception 'Unknown timezone: %', new.timezone
+      using errcode = '22023';
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger user_settings_validate_timezone
+before insert or update on public.user_settings
+for each row execute function private.validate_user_settings_timezone();
+
+create function private.protect_transfer_leg_identity()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if old.transfer_id is distinct from new.transfer_id then
+    raise exception 'A transaction cannot enter, leave, or change a transfer aggregate'
+      using errcode = '23514';
+  end if;
+
+  if old.transfer_id is not null
+    and (
+      old.user_id is distinct from new.user_id
+      or old.type is distinct from new.type
+    ) then
+    raise exception 'Transfer leg ownership and direction are immutable'
+      using errcode = '23514';
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger transactions_protect_transfer_leg_identity
+before update on public.transactions
+for each row execute function private.protect_transfer_leg_identity();
+
+create function private.validate_active_financial_references()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  new_data jsonb;
+  old_data jsonb;
+  target_user_id uuid;
+  target_account_id uuid;
+  target_category_id uuid;
+  account_key text;
+  category_key text;
+begin
+  new_data := to_jsonb(new);
+  old_data := coalesce(to_jsonb(old), '{}'::jsonb);
+  target_user_id := (new_data ->> 'user_id')::uuid;
+
+  if tg_table_name = 'transfers' then
+    if tg_op = 'INSERT'
+      or new_data ->> 'user_id' is distinct from old_data ->> 'user_id'
+      or new_data ->> 'source_account_id' is distinct from old_data ->> 'source_account_id'
+      or new_data ->> 'destination_account_id' is distinct from old_data ->> 'destination_account_id' then
+      if (
+        select count(*)
+        from public.accounts as account
+        where account.user_id = target_user_id
+          and account.id in (
+            (new_data ->> 'source_account_id')::uuid,
+            (new_data ->> 'destination_account_id')::uuid
+          )
+          and account.archived_at is null
+      ) <> 2 then
+        raise exception 'New transfers require two active accounts owned by the user'
+          using errcode = '23514';
+      end if;
+    end if;
+
+    return new;
+  end if;
+
+  if tg_table_name in ('recurring_transactions', 'transactions') then
+    account_key := 'account_id';
+    category_key := 'category_id';
+  elsif tg_table_name = 'budgets' then
+    category_key := 'category_id';
+  elsif tg_table_name = 'financial_goals' then
+    account_key := 'account_id';
+  else
+    raise exception 'Unsupported active-reference table: %', tg_table_name;
+  end if;
+
+  if account_key is not null then
+    target_account_id := nullif(new_data ->> account_key, '')::uuid;
+
+    if target_account_id is not null
+      and (
+        tg_op = 'INSERT'
+        or new_data ->> 'user_id' is distinct from old_data ->> 'user_id'
+        or new_data ->> account_key is distinct from old_data ->> account_key
+      )
+      and exists (
+        select 1
+        from public.accounts as account
+        where account.id = target_account_id
+          and account.user_id = target_user_id
+      )
+      and not exists (
+        select 1
+        from public.accounts as account
+        where account.id = target_account_id
+          and account.user_id = target_user_id
+          and account.archived_at is null
+      ) then
+      raise exception 'New % records require an active account owned by the user', tg_table_name
+        using errcode = '23514';
+    end if;
+  end if;
+
+  if category_key is not null then
+    target_category_id := nullif(new_data ->> category_key, '')::uuid;
+
+    if target_category_id is not null
+      and (
+        tg_op = 'INSERT'
+        or new_data ->> 'user_id' is distinct from old_data ->> 'user_id'
+        or new_data ->> category_key is distinct from old_data ->> category_key
+      )
+      and exists (
+        select 1
+        from public.categories as category
+        where category.id = target_category_id
+          and category.user_id = target_user_id
+      )
+      and not exists (
+        select 1
+        from public.categories as category
+        where category.id = target_category_id
+          and category.user_id = target_user_id
+          and category.archived_at is null
+      ) then
+      raise exception 'New % records require an active category owned by the user', tg_table_name
+        using errcode = '23514';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+create trigger recurring_transactions_validate_active_references
+before insert or update on public.recurring_transactions
+for each row execute function private.validate_active_financial_references();
+
+create trigger transfers_validate_active_references
+before insert or update on public.transfers
+for each row execute function private.validate_active_financial_references();
+
+create trigger transactions_validate_active_references
+before insert or update on public.transactions
+for each row execute function private.validate_active_financial_references();
+
+create trigger budgets_validate_active_references
+before insert or update on public.budgets
+for each row execute function private.validate_active_financial_references();
+
+create trigger financial_goals_validate_active_references
+before insert or update on public.financial_goals
+for each row execute function private.validate_active_financial_references();
 
 create function private.sync_transfer_legs()
 returns trigger
@@ -933,8 +1117,12 @@ begin
   insert into public.profiles (id, full_name, avatar_url)
   values (
     new.id,
-    nullif(btrim(new.raw_user_meta_data ->> 'full_name'), ''),
-    nullif(btrim(new.raw_user_meta_data ->> 'avatar_url'), '')
+    nullif(left(btrim(new.raw_user_meta_data ->> 'full_name'), 120), ''),
+    case
+      when char_length(btrim(new.raw_user_meta_data ->> 'avatar_url')) between 1 and 2048
+        then btrim(new.raw_user_meta_data ->> 'avatar_url')
+      else null
+    end
   )
   on conflict (id) do nothing;
 
@@ -955,8 +1143,12 @@ for each row execute function private.handle_new_user();
 insert into public.profiles (id, full_name, avatar_url)
 select
   auth_user.id,
-  nullif(btrim(auth_user.raw_user_meta_data ->> 'full_name'), ''),
-  nullif(btrim(auth_user.raw_user_meta_data ->> 'avatar_url'), '')
+  nullif(left(btrim(auth_user.raw_user_meta_data ->> 'full_name'), 120), ''),
+  case
+    when char_length(btrim(auth_user.raw_user_meta_data ->> 'avatar_url')) between 1 and 2048
+      then btrim(auth_user.raw_user_meta_data ->> 'avatar_url')
+    else null
+  end
 from auth.users as auth_user
 on conflict (id) do nothing;
 
@@ -981,10 +1173,14 @@ select
   txn.*,
   case
     when txn.status = 'pending'
-      and txn.due_date < current_date then 'overdue'
+      and txn.due_date < (
+        current_timestamp at time zone coalesce(settings.timezone, 'America/Fortaleza')
+      )::date then 'overdue'
     else txn.status::text
   end as effective_status
-from public.transactions as txn;
+from public.transactions as txn
+left join public.user_settings as settings
+  on settings.user_id = txn.user_id;
 
 create view public.account_balances
 with (security_invoker = true)
@@ -1240,7 +1436,7 @@ revoke all on table
   public.transactions_with_effective_status,
   public.account_balances,
   public.budget_progress
-from public, anon;
+from public, anon, authenticated;
 
 grant select, update on table public.profiles, public.user_settings
 to authenticated;
