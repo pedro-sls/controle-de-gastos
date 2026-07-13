@@ -26,7 +26,7 @@
     "supabase:status": "supabase status",
     "db:reset": "supabase db reset",
     "db:lint": "supabase db lint --local --level warning --fail-on error",
-    "db:test": "supabase test db",
+    "db:test": "supabase test db supabase/tests/database",
     "db:types": "supabase gen types typescript --local > src/types/database.ts"
   },
   "dependencies": {
