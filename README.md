@@ -199,6 +199,13 @@ ponto flutuante nessas regras.
 Cartões de crédito, metas com interface própria, integração bancária, Open Finance,
 OCR, OFX, compartilhamento familiar e aplicativo nativo permanecem fora do MVP.
 
+## Contribuição e Git Flow
+
+O projeto utiliza `main` para versões estáveis, `develop` para integração e
+branches `feature/*`, `release/*` e `hotfix/*` para o trabalho diário. Consulte o
+[guia de contribuição](CONTRIBUTING.md) para a convenção completa de branches,
+commits, pushes e pull requests.
+
 ## Próxima etapa
 
 Projetar e versionar o banco PostgreSQL no Supabase, incluindo as tabelas do MVP,
