@@ -20,7 +20,14 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm run build"
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run build",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:lint": "supabase db lint --local --level warning --fail-on error",
+    "db:test": "supabase test db supabase/tests/database",
+    "db:types": "supabase gen types typescript --local --schema public > src/types/database.ts && prettier --write src/types/database.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -45,6 +52,7 @@
     "eslint-config-next": "16.2.10",
     "prettier": "^3.9.5",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "supabase": "2.109.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

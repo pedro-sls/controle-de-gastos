@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=moderate
+
+      - name: Validate application
+        run: npm run check
+
+  database:
+    name: Database quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start local PostgreSQL
+        run: npx supabase db start
+
+      - name: Replay migrations
+        run: npm run db:reset
+
+      - name: Lint database
+        run: npm run db:lint
+
+      - name: Run database tests
+        shell: bash
+        run: |
+          if find supabase/tests/database -type f -name '*.sql' -print -quit 2>/dev/null | grep -q .; then
+            npm run db:test
+          else
+            echo "No database tests found yet."
+          fi
+
+      - name: Generate database types
+        shell: bash
+        run: |
+          mkdir -p generated
+          npx supabase gen types typescript --local --schema public > generated/database.ts
+
+      - name: Upload generated types
+        uses: actions/upload-artifact@v7
+        with:
+          name: database-types
+          path: generated/database.ts
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stop local PostgreSQL
+        if: always()
+        run: npx supabase stop --no-backup
