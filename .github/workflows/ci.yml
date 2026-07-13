@@ -97,4 +97,4 @@ jobs:
 
       - name: Stop local PostgreSQL
         if: always()
-        run: npx supabase db stop --no-backup
+        run: npx supabase stop --no-backup
