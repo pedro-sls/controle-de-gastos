@@ -591,54 +591,6 @@ export type Database = {
           updated_at: string | null;
           user_id: string | null;
         };
-        Insert: {
-          account_id?: string | null;
-          amount?: number | null;
-          category_id?: string | null;
-          category_kind?: Database["public"]["Enums"]["category_type"] | null;
-          created_at?: string | null;
-          description?: string | null;
-          due_date?: string | null;
-          effective_status?: never;
-          id?: string | null;
-          is_fixed?: boolean | null;
-          is_recurring?: boolean | null;
-          note?: string | null;
-          paid_date?: string | null;
-          payment_method?: Database["public"]["Enums"]["payment_method"] | null;
-          recurrence_date?: string | null;
-          recurring_transaction_id?: string | null;
-          status?: Database["public"]["Enums"]["transaction_status"] | null;
-          transaction_date?: string | null;
-          transfer_id?: string | null;
-          type?: Database["public"]["Enums"]["transaction_type"] | null;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
-        Update: {
-          account_id?: string | null;
-          amount?: number | null;
-          category_id?: string | null;
-          category_kind?: Database["public"]["Enums"]["category_type"] | null;
-          created_at?: string | null;
-          description?: string | null;
-          due_date?: string | null;
-          effective_status?: never;
-          id?: string | null;
-          is_fixed?: boolean | null;
-          is_recurring?: boolean | null;
-          note?: string | null;
-          paid_date?: string | null;
-          payment_method?: Database["public"]["Enums"]["payment_method"] | null;
-          recurrence_date?: string | null;
-          recurring_transaction_id?: string | null;
-          status?: Database["public"]["Enums"]["transaction_status"] | null;
-          transaction_date?: string | null;
-          transfer_id?: string | null;
-          type?: Database["public"]["Enums"]["transaction_type"] | null;
-          updated_at?: string | null;
-          user_id?: string | null;
-        };
         Relationships: [
           {
             foreignKeyName: "transactions_account_owner_fk";
