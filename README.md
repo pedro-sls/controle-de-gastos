@@ -7,22 +7,26 @@ até o fim do mês.
 
 ## Status do projeto
 
-A **Etapa 1 — preparação** está concluída. O repositório contém a fundação técnica
-e uma página inicial de validação, mas ainda não possui autenticação, banco de
-dados, movimentações financeiras ou dashboard.
+As **Etapas 1 e 2 estão concluídas**. O repositório contém a fundação web e o
+modelo PostgreSQL seguro, com constraints, índices, RLS, transferências atômicas,
+58 testes pgTAP e tipos TypeScript gerados. A interface ainda não possui
+autenticação, formulários financeiros ou dashboard; esse trabalho começa na
+Etapa 3.
 
-Não use dados financeiros reais antes da Etapa 2 configurar o banco, as
-restrições de integridade e as políticas de Row Level Security (RLS).
+O banco foi validado apenas em ambientes descartáveis locais e de CI. Ainda não há
+projeto Supabase remoto vinculado nem deploy de produção.
 
 ## Tecnologias
 
-Fundação instalada nesta etapa:
+Stack atual:
 
 - Next.js 16 com App Router e React 19;
 - TypeScript em modo estrito;
 - Tailwind CSS 4;
 - shadcn/ui com Base UI, variáveis CSS e Lucide Icons;
 - Supabase JavaScript e Supabase SSR;
+- Supabase CLI, PostgreSQL 17 e pgTAP;
+- GitHub Actions para qualidade web e validação do banco;
 - ESLint e Prettier.
 
 React Hook Form, Zod, Recharts e date-fns são obrigatórios no produto, mas serão
@@ -33,9 +37,11 @@ evita dependências sem uso no scaffold.
 
 - Node.js 22 ou superior;
 - npm 10 ou superior;
-- um projeto Supabase para as etapas que acessarem dados.
+- Docker Desktop para executar o Supabase local;
+- WSL 2 no Windows.
 
-As versões utilizadas ficam registradas no `package-lock.json`.
+Um projeto Supabase remoto ainda não é necessário. As versões utilizadas ficam
+registradas no `package-lock.json`.
 
 ## Instalação
 
@@ -53,12 +59,18 @@ Em macOS ou Linux, use `cp .env.example .env.local`.
 
 ## Configuração do Supabase
 
-No painel do seu projeto Supabase, copie a URL do projeto e a chave pública
-(`publishable key`) para `.env.local`:
+Inicie a stack local e consulte as credenciais de desenvolvimento:
+
+```bash
+npm run supabase:start
+npm run supabase:status
+```
+
+Copie a URL e a chave pública exibidas para `.env.local`:
 
 ```dotenv
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_key
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_local_publishable_key
 ```
 
 Somente essas duas variáveis públicas são necessárias no frontend. Nunca adicione
@@ -73,9 +85,13 @@ Os clientes ficam separados por ambiente:
 O Proxy de renovação de sessão será criado junto da autenticação na Etapa 3. No
 Next.js 16, essa convenção usa `src/proxy.ts` em vez de `middleware.ts`.
 
+O fluxo completo do banco, inclusive solução de problemas no Windows, está em
+[Banco de dados e segurança](docs/database.md).
+
 ## Execução local
 
 ```bash
+npm run supabase:start
 npm run dev
 ```
 
@@ -83,17 +99,24 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 ## Comandos disponíveis
 
-| Comando                | Finalidade                                       |
-| ---------------------- | ------------------------------------------------ |
-| `npm run dev`          | inicia o servidor de desenvolvimento             |
-| `npm run build`        | gera o build otimizado de produção               |
-| `npm start`            | serve um build já gerado                         |
-| `npm run lint`         | executa as regras do ESLint                      |
-| `npm run lint:fix`     | corrige automaticamente problemas seguros        |
-| `npm run typecheck`    | valida os tipos sem emitir arquivos              |
-| `npm run format`       | formata os arquivos com Prettier                 |
-| `npm run format:check` | verifica a formatação sem alterar arquivos       |
-| `npm run check`        | executa formatação, lint, tipos e build em série |
+| Comando                   | Finalidade                                       |
+| ------------------------- | ------------------------------------------------ |
+| `npm run dev`             | inicia o servidor de desenvolvimento             |
+| `npm run build`           | gera o build otimizado de produção               |
+| `npm start`               | serve um build já gerado                         |
+| `npm run lint`            | executa as regras do ESLint                      |
+| `npm run lint:fix`        | corrige automaticamente problemas seguros        |
+| `npm run typecheck`       | valida os tipos sem emitir arquivos              |
+| `npm run format`          | formata os arquivos com Prettier                 |
+| `npm run format:check`    | verifica a formatação sem alterar arquivos       |
+| `npm run check`           | executa formatação, lint, tipos e build em série |
+| `npm run supabase:start`  | inicia a stack Supabase local                    |
+| `npm run supabase:status` | exibe URLs e credenciais locais                  |
+| `npm run supabase:stop`   | encerra a stack Supabase local                   |
+| `npm run db:reset`        | recria o banco e reaplica migrations             |
+| `npm run db:lint`         | analisa funções e schema PostgreSQL              |
+| `npm run db:test`         | executa os 58 testes pgTAP                       |
+| `npm run db:types`        | regenera e formata os tipos TypeScript do schema |
 
 ## Build de produção
 
@@ -102,7 +125,7 @@ npm run check
 npm start
 ```
 
-O build da preparação não exige credenciais reais porque nenhum cliente Supabase
+O build da aplicação não exige credenciais reais porque nenhum cliente Supabase
 é instanciado durante a renderização da página inicial. As variáveis são validadas
 no momento em que um cliente é criado.
 
@@ -127,6 +150,17 @@ src/
       env.ts             # validação das variáveis públicas
       server.ts          # cliente para o servidor
     utils.ts             # utilitários compartilhados do design system
+  types/
+    database.ts          # tipos gerados a partir do schema Supabase
+supabase/
+  config.toml            # configuração da stack local
+  migrations/            # histórico versionado do PostgreSQL
+  tests/database/        # testes pgTAP de segurança e integridade
+  seed.sql               # reservado a dados locais opcionais
+docs/
+  database.md            # decisões e operação do banco
+.github/workflows/
+  ci.yml                 # validação web e PostgreSQL no GitHub Actions
 ```
 
 Conforme o produto crescer, `src/app` continuará responsável por rotas e
@@ -137,25 +171,28 @@ genéricos permanecerão em `src/components` e infraestrutura compartilhada em
 
 ## Migrações e dados de demonstração
 
-Ainda não existem migrações nem seed nesta etapa. A Etapa 2 criará o diretório
-`supabase/`, o modelo PostgreSQL, índices, constraints, triggers justificadas,
-políticas RLS e categorias padrão.
+A migration inicial cria as nove tabelas do domínio, índices, constraints,
+triggers, policies RLS, três views derivadas e três RPCs de transferência. O
+provisionamento de usuário cria 18 categorias padrão de forma idempotente.
 
-Dados de demonstração serão opcionais e exclusivos para desenvolvimento. Eles
-nunca serão inseridos automaticamente em produção.
+O `seed.sql` permanece vazio. Dados de demonstração serão opcionais e exclusivos
+para desenvolvimento; nunca serão inseridos automaticamente em produção. Consulte
+[a documentação do banco](docs/database.md) antes de alterar o schema.
 
 ## Testes
 
-Ainda não há regras financeiras nem test runner para testar. A qualidade atual é
-verificada por formatação, lint, checagem de tipos e build:
+A qualidade web e o banco são validados separadamente:
 
 ```bash
 npm run check
+npm run db:reset
+npm run db:lint
+npm run db:test
 ```
 
-Os testes automatizados serão adicionados junto das regras de saldo, gasto diário,
-orçamentos, transferências e recorrências. Não serão usados valores monetários em
-ponto flutuante nessas regras.
+As três suítes pgTAP somam 58 asserções sobre provisionamento, isolamento entre
+usuários, referências cruzadas, arquivamento, privilégios, auditoria,
+transferências e saldos. A CI repete essas validações em PostgreSQL descartável.
 
 ## Decisões arquiteturais
 
@@ -164,13 +201,13 @@ ponto flutuante nessas regras.
 - Leituras protegidas serão feitas no servidor. Mutações usarão Server Actions
   validadas; Route Handlers ficarão reservados a endpoints que realmente precisem
   de HTTP.
-- Valores monetários serão persistidos como `numeric(14,2)` e manipulados em
+- Valores monetários são persistidos como `numeric(14,2)` e serão manipulados em
   centavos inteiros ou representação decimal explícita no TypeScript.
-- Saldo atual e orçamento utilizado serão calculados, evitando cópias mutáveis que
+- Saldo atual e orçamento utilizado são calculados, evitando cópias mutáveis que
   possam ficar inconsistentes.
-- Transferências serão atômicas no PostgreSQL e criarão duas movimentações
+- Transferências são atômicas no PostgreSQL e criam duas movimentações
   relacionadas, sem entrar nos totais de receita ou despesa.
-- Toda tabela vinculada a usuário terá RLS. Filtros de frontend nunca serão
+- Toda tabela vinculada a usuário possui RLS. Filtros de frontend nunca serão
   tratados como barreira de segurança.
 - Não há ORM ou biblioteca de estado global nesta fase; ambos só serão adotados se
   uma necessidade concreta justificar.
@@ -184,7 +221,8 @@ ponto flutuante nessas regras.
 
 1. **Preparação (concluída):** scaffold, qualidade, shadcn/ui, Supabase e
    documentação inicial.
-2. **Banco e segurança:** tabelas, constraints, índices, RLS e categorias padrão.
+2. **Banco e segurança (concluída):** tabelas, constraints, índices, RLS,
+   transferências, categorias padrão, testes e tipos gerados.
 3. **Autenticação:** cadastro, login, logout, recuperação, perfil e rotas privadas.
 4. **Layout:** sidebar, navegação mobile, cabeçalho, tema e estados compartilhados.
 5. **Contas e categorias:** CRUD, saldo inicial, categorias padrão e arquivamento.
@@ -208,6 +246,5 @@ commits, pushes e pull requests.
 
 ## Próxima etapa
 
-Projetar e versionar o banco PostgreSQL no Supabase, incluindo as tabelas do MVP,
-integridade referencial, índices e políticas RLS completas antes de conectar telas
-a dados financeiros reais.
+Implementar a Etapa 3 em uma nova `feature/*`: cadastro, login, logout, recuperação
+de senha, atualização de perfil, proxy de sessão e proteção das rotas privadas.
