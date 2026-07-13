@@ -1,0 +1,2 @@
+-- As categorias padrão são criadas pelo trigger de novos usuários definido nas
+-- migrations. Dados financeiros de demonstração não são inseridos automaticamente.
