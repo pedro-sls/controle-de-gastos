@@ -14,6 +14,7 @@ const PRIVATE_PATH_PREFIXES = [
   "/recorrencias",
   "/relatorios",
   "/configuracoes",
+  "/mais",
 ];
 
 function matchesPath(pathname: string, paths: string[]) {
