@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { getAppUrl, getAuthCallbackUrl } from "./app-url";
+import {
+  getAppUrl,
+  getAuthCallbackUrl,
+  shouldUseSecureAuthCookies,
+} from "./app-url";
 
 const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
 
@@ -40,5 +44,19 @@ describe("getAuthCallbackUrl", () => {
     expect(getAuthCallbackUrl("/nova-senha")).toBe(
       "http://localhost:3000/auth/callback?next=%2Fnova-senha",
     );
+  });
+});
+
+describe("shouldUseSecureAuthCookies", () => {
+  it("mantém cookies compatíveis com o HTTP local", () => {
+    process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+
+    expect(shouldUseSecureAuthCookies()).toBe(false);
+  });
+
+  it("exige cookies Secure em HTTPS", () => {
+    process.env.NEXT_PUBLIC_APP_URL = "https://meusaldo.example";
+
+    expect(shouldUseSecureAuthCookies()).toBe(true);
   });
 });
