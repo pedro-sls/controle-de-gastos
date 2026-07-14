@@ -15,6 +15,13 @@ const defaultMessages: Record<AuthErrorContext, string> = {
   signup: "Não foi possível concluir o cadastro. Tente novamente.",
 };
 
+export function isAuthRateLimitError(error: AuthErrorLike) {
+  const fingerprint =
+    `${error.code ?? ""} ${error.message ?? ""}`.toLowerCase();
+
+  return error.status === 429 || fingerprint.includes("rate_limit");
+}
+
 export function getAuthErrorMessage(
   error: AuthErrorLike,
   context: AuthErrorContext,
@@ -22,7 +29,7 @@ export function getAuthErrorMessage(
   const fingerprint =
     `${error.code ?? ""} ${error.message ?? ""}`.toLowerCase();
 
-  if (error.status === 429 || fingerprint.includes("rate_limit")) {
+  if (isAuthRateLimitError(error)) {
     return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
   }
 

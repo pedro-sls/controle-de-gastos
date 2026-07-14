@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getAuthErrorMessage } from "../lib/auth-error";
+import { getAuthErrorMessage, isAuthRateLimitError } from "../lib/auth-error";
 
 describe("getAuthErrorMessage", () => {
   it.each([
@@ -29,5 +29,13 @@ describe("getAuthErrorMessage", () => {
       "Não foi possível concluir o cadastro. Tente novamente.",
     );
     expect(message).not.toContain(providerMessage);
+  });
+
+  it("identifica rate limit sem depender somente do status HTTP", () => {
+    expect(isAuthRateLimitError({ code: "over_email_send_rate_limit" })).toBe(
+      true,
+    );
+    expect(isAuthRateLimitError({ status: 429 })).toBe(true);
+    expect(isAuthRateLimitError({ code: "invalid_credentials" })).toBe(false);
   });
 });
