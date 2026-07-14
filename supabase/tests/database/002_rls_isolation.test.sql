@@ -273,7 +273,7 @@ select is(
     where name in ('Account A', 'Second account A')
   ),
   0::bigint,
-  'user B cannot see user A account identifiers'
+  'user B cannot see user A accounts'
 );
 
 select * from finish();

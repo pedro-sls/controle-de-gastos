@@ -247,40 +247,43 @@ select is(
   'paid income contributes to the calculated balance'
 );
 
-select lives_ok(
-  $$
-    insert into public.transactions (
-      user_id,
-      account_id,
-      category_id,
-      description,
-      amount,
-      type,
-      transaction_date,
-      status,
-      payment_method
-    )
-    select
-      '40000000-0000-0000-0000-000000000001',
-      account.id,
-      category.id,
-      'Despesa pendente',
-      20,
-      'expense',
-      current_date,
-      'pending',
-      'pix'
-    from public.accounts as account
-    cross join public.categories as category
-    where account.user_id = '40000000-0000-0000-0000-000000000001'
-      and account.name = 'Conta principal'
-      and category.user_id = account.user_id
-      and category.type = 'expense'
-      and category.archived_at is null
-    order by category.id
-    limit 1
-  $$,
-  'a pending expense can be recorded'
+with inserted_transaction as (
+  insert into public.transactions (
+    user_id,
+    account_id,
+    category_id,
+    description,
+    amount,
+    type,
+    transaction_date,
+    status,
+    payment_method
+  )
+  select
+    '40000000-0000-0000-0000-000000000001',
+    account.id,
+    category.id,
+    'Despesa pendente',
+    20,
+    'expense',
+    current_date,
+    'pending',
+    'pix'
+  from public.accounts as account
+  cross join public.categories as category
+  where account.user_id = '40000000-0000-0000-0000-000000000001'
+    and account.name = 'Conta principal'
+    and category.user_id = account.user_id
+    and category.type = 'expense'
+    and category.archived_at is null
+  order by category.id
+  limit 1
+  returning 1
+)
+select is(
+  (select count(*) from inserted_transaction),
+  1::bigint,
+  'a pending expense is recorded exactly once'
 );
 
 select is(
