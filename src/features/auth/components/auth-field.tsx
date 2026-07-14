@@ -89,6 +89,7 @@ export function PasswordField({
   ...props
 }: AuthFieldProps & { id: string }) {
   const [isVisible, setIsVisible] = useState(false);
+  const isEffectivelyVisible = isVisible && !disabled;
 
   return (
     <div className="space-y-2">
@@ -103,7 +104,7 @@ export function PasswordField({
       <div className="relative">
         <Input
           id={id}
-          type={isVisible && !disabled ? "text" : "password"}
+          type={isEffectivelyVisible ? "text" : "password"}
           aria-describedby={getDescribedBy(id, error, hint)}
           aria-invalid={Boolean(error)}
           aria-required={required}
@@ -114,13 +115,13 @@ export function PasswordField({
         />
         <button
           type="button"
-          aria-label={isVisible ? "Ocultar senha" : "Mostrar senha"}
-          aria-pressed={isVisible && !disabled}
+          aria-label={isEffectivelyVisible ? "Ocultar senha" : "Mostrar senha"}
+          aria-pressed={isEffectivelyVisible}
           className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50"
           disabled={disabled}
           onClick={() => setIsVisible((current) => !current)}
         >
-          {isVisible ? (
+          {isEffectivelyVisible ? (
             <EyeOff aria-hidden="true" className="size-4" />
           ) : (
             <Eye aria-hidden="true" className="size-4" />
