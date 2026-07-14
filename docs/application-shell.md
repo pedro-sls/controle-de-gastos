@@ -11,7 +11,8 @@ autenticadas.
 - cabeçalho persistente com contexto da rota, tema e logout;
 - ação destacada para criar uma movimentação;
 - tema claro, escuro ou sincronizado com o sistema;
-- fallback de carregamento e recuperação de erro para toda a área privada;
+- fallback de carregamento e recuperação de erro para o conteúdo das rotas
+  privadas;
 - rotas protegidas para as funcionalidades previstas no MVP;
 - página `/mais`, que mantém todos os destinos acessíveis no celular;
 - helpers puros e testados para correspondência de rotas e preferência de tema.
@@ -83,7 +84,9 @@ biblioteca. O botão permanece desabilitado até a hidratação, usando
 `src/app/(dashboard)/loading.tsx` mantém o shell visível e apresenta um skeleton
 sem valores financeiros simulados. `error.tsx` registra apenas o `digest` do erro
 inesperado e oferece tanto a tentativa do Next.js 16 com `unstable_retry` quanto
-um retorno seguro ao dashboard.
+um retorno seguro ao dashboard. Como o boundary pertence ao mesmo segmento, ele
+recupera falhas das páginas, mas não uma falha do próprio layout; o layout é
+deliberadamente síncrono e estrutural para reduzir essa superfície.
 
 ## Execução e validação local
 

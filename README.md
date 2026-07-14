@@ -217,7 +217,7 @@ npm run db:lint
 npm run db:test
 ```
 
-Os 60 testes Vitest cobrem autenticação, limites, erros seguros, configuração da
+Os testes Vitest cobrem autenticação, limites, erros seguros, configuração da
 origem, prevenção de open redirect, navegação e tema. As três suítes pgTAP somam
 58 asserções sobre provisionamento, isolamento entre
 usuários, referências cruzadas, arquivamento, privilégios, auditoria,
