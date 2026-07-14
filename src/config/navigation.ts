@@ -22,6 +22,7 @@ export type NavigationItem = Readonly<{
   icon: LucideIcon;
   exact?: boolean;
   emphasized?: boolean;
+  activePathPrefixes?: readonly string[];
 }>;
 
 const dashboardItem = {
@@ -105,6 +106,13 @@ const moreItem = {
   description: "Acessar os demais recursos",
   icon: Menu,
   exact: true,
+  activePathPrefixes: [
+    accountsItem.href,
+    categoriesItem.href,
+    recurringItem.href,
+    reportsItem.href,
+    settingsItem.href,
+  ],
 } satisfies NavigationItem;
 
 export const desktopNavigationItems: readonly NavigationItem[] = [
@@ -159,13 +167,25 @@ export function isNavigationItemActive(
   pathname: string,
   href: string,
   exact = false,
+  activePathPrefixes: readonly string[] = [],
 ) {
   const currentPath = normalizePathname(pathname);
   const targetPath = normalizePathname(href);
 
+  const matchesPath = (candidatePath: string, exactMatch = false) => {
+    const normalizedCandidate = normalizePathname(candidatePath);
+
+    return (
+      currentPath === normalizedCandidate ||
+      (!exactMatch &&
+        normalizedCandidate !== "/" &&
+        currentPath.startsWith(`${normalizedCandidate}/`))
+    );
+  };
+
   return (
-    currentPath === targetPath ||
-    (!exact && targetPath !== "/" && currentPath.startsWith(`${targetPath}/`))
+    matchesPath(targetPath, exact) ||
+    activePathPrefixes.some((prefix) => matchesPath(prefix))
   );
 }
 

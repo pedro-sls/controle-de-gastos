@@ -11,7 +11,7 @@ export function AppHeader() {
         <div className="min-w-0">
           <AppBrand
             compact
-            className="mb-1 lg:hidden [&>span:first-child]:hidden"
+            className="mb-1 min-h-11 lg:hidden [&>span:first-child]:hidden"
           />
           <CurrentPageLabel />
         </div>

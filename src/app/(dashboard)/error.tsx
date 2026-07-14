@@ -19,7 +19,10 @@ export default function AuthenticatedError({
   }, [error]);
 
   return (
-    <section className="bg-card max-w-2xl rounded-2xl border p-6 shadow-sm sm:p-8">
+    <section
+      className="bg-card max-w-2xl rounded-2xl border p-6 shadow-sm sm:p-8"
+      role="alert"
+    >
       <span className="bg-destructive/10 text-destructive flex size-12 items-center justify-center rounded-full">
         <CircleAlert aria-hidden="true" className="size-6" />
       </span>

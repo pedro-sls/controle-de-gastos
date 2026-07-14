@@ -67,4 +67,38 @@ describe("navegação do aplicativo", () => {
       moreNavigationItems.every(({ href }) => catalogHrefs.has(href)),
     ).toBe(true);
   });
+
+  it("mantém Mais ativo em todos os destinos que agrupa", () => {
+    const moreItem = mobileNavigationItems.find(({ href }) => href === "/mais");
+
+    expect(moreItem).toBeDefined();
+
+    for (const pathname of [
+      "/mais",
+      "/contas",
+      "/contas/123",
+      "/categorias",
+      "/recorrencias",
+      "/relatorios",
+      "/configuracoes",
+    ]) {
+      expect(
+        isNavigationItemActive(
+          pathname,
+          moreItem?.href ?? "",
+          moreItem?.exact,
+          moreItem?.activePathPrefixes,
+        ),
+      ).toBe(true);
+    }
+
+    expect(
+      isNavigationItemActive(
+        "/orcamentos",
+        moreItem?.href ?? "",
+        moreItem?.exact,
+        moreItem?.activePathPrefixes,
+      ),
+    ).toBe(false);
+  });
 });
