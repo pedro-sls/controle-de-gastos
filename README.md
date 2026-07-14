@@ -7,11 +7,11 @@ até o fim do mês.
 
 ## Status do projeto
 
-As **Etapas 1 e 2 estão concluídas**. O repositório contém a fundação web e o
-modelo PostgreSQL seguro, com constraints, índices, RLS, transferências atômicas,
-58 testes pgTAP e tipos TypeScript gerados. A interface ainda não possui
-autenticação, formulários financeiros ou dashboard; esse trabalho começa na
-Etapa 3.
+As **Etapas 1, 2 e 3 estão concluídas**. O repositório contém a fundação web, o
+modelo PostgreSQL seguro e autenticação completa com Supabase Auth: cadastro,
+login, logout, confirmação de e-mail, recuperação e atualização de senha,
+persistência de sessão e proteção de rotas. O banco possui constraints, índices,
+RLS, transferências atômicas, 58 testes pgTAP e tipos TypeScript gerados.
 
 O banco foi validado apenas em ambientes descartáveis locais e de CI. Ainda não há
 projeto Supabase remoto vinculado nem deploy de produção.
@@ -25,13 +25,14 @@ Stack atual:
 - Tailwind CSS 4;
 - shadcn/ui com Base UI, variáveis CSS e Lucide Icons;
 - Supabase JavaScript e Supabase SSR;
+- React Hook Form e Zod;
 - Supabase CLI, PostgreSQL 17 e pgTAP;
+- Vitest para regras executáveis no TypeScript;
 - GitHub Actions para qualidade web e validação do banco;
 - ESLint e Prettier.
 
-React Hook Form, Zod, Recharts e date-fns são obrigatórios no produto, mas serão
-instalados quando as primeiras features que os utilizam forem implementadas. Isso
-evita dependências sem uso no scaffold.
+Recharts e date-fns continuam previstos, mas serão instalados somente nas etapas
+que implementarem gráficos e regras de datas. Isso evita dependências sem uso.
 
 ## Pré-requisitos
 
@@ -69,24 +70,30 @@ npm run supabase:status
 Copie a URL e a chave pública exibidas para `.env.local`:
 
 ```dotenv
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_local_publishable_key
 ```
 
-Somente essas duas variáveis públicas são necessárias no frontend. Nunca adicione
-a `service_role key`, segredos ou chaves privadas a variáveis `NEXT_PUBLIC_*`.
+As três variáveis são públicas e não contêm segredos. `NEXT_PUBLIC_APP_URL` é a
+origem confiável usada nos links de autenticação. Nunca adicione a `service_role
+key`, segredos ou chaves privadas a variáveis `NEXT_PUBLIC_*`.
 
 Os clientes ficam separados por ambiente:
 
 - `src/lib/supabase/client.ts`: Client Components;
 - `src/lib/supabase/server.ts`: Server Components, Actions e Route Handlers;
+- `src/lib/supabase/proxy.ts`: renovação de sessão por requisição;
 - `src/lib/supabase/env.ts`: leitura e validação da configuração pública.
 
-O Proxy de renovação de sessão será criado junto da autenticação na Etapa 3. No
-Next.js 16, essa convenção usa `src/proxy.ts` em vez de `middleware.ts`.
+No Next.js 16, `src/proxy.ts` substitui a convenção antiga `middleware.ts`. Ele
+renova cookies e faz redirects iniciais; páginas e ações protegidas validam a
+identidade novamente.
 
 O fluxo completo do banco, inclusive solução de problemas no Windows, está em
-[Banco de dados e segurança](docs/database.md).
+[Banco de dados e segurança](docs/database.md). Cadastro, templates de e-mail,
+sessões e configuração remota estão em
+[Autenticação e sessões](docs/authentication.md).
 
 ## Execução local
 
@@ -107,9 +114,11 @@ Acesse [http://localhost:3000](http://localhost:3000).
 | `npm run lint`            | executa as regras do ESLint                      |
 | `npm run lint:fix`        | corrige automaticamente problemas seguros        |
 | `npm run typecheck`       | valida os tipos sem emitir arquivos              |
+| `npm test`                | executa os testes unitários uma vez              |
+| `npm run test:watch`      | executa testes unitários em modo interativo      |
 | `npm run format`          | formata os arquivos com Prettier                 |
 | `npm run format:check`    | verifica a formatação sem alterar arquivos       |
-| `npm run check`           | executa formatação, lint, tipos e build em série |
+| `npm run check`           | executa formatação, lint, tipos, testes e build  |
 | `npm run supabase:start`  | inicia a stack Supabase local                    |
 | `npm run supabase:status` | exibe URLs e credenciais locais                  |
 | `npm run supabase:stop`   | encerra a stack Supabase local                   |
@@ -125,39 +134,48 @@ npm run check
 npm start
 ```
 
-O build da aplicação não exige credenciais reais porque nenhum cliente Supabase
-é instanciado durante a renderização da página inicial. As variáveis são validadas
-no momento em que um cliente é criado.
+O build da aplicação não exige credenciais reais. As rotas que usam autenticação
+validam as variáveis no momento da requisição; a execução local e o deploy exigem
+os três valores configurados.
 
 ## Estrutura atual
 
 ```text
 src/
   app/
+    (auth)/              # login, cadastro e recuperação de senha
+    (dashboard)/         # rotas privadas; dashboard mínimo da Etapa 3
+    auth/                # callbacks HTTP de confirmação e PKCE
     globals.css          # Tailwind e tokens visuais do shadcn/ui
     layout.tsx           # layout raiz, idioma e metadados
-    page.tsx             # página de validação da preparação
+    page.tsx             # apresentação e entradas públicas
   components/
     ui/
-      button.tsx         # componente compartilhado do shadcn/ui
+      *.tsx              # componentes compartilhados do shadcn/ui
   config/
+    app-url.ts           # validação da origem confiável
     site.ts              # nome, localidade, moeda e fuso padrão
   features/
-    README.md            # convenção das features futuras
+    auth/                # ações, schemas, formulários e testes de autenticação
   lib/
+    auth/                # identidade, gates e respostas sem cache
     supabase/
       client.ts          # cliente para o navegador
       env.ts             # validação das variáveis públicas
+      proxy.ts           # refresh de cookies e claims
       server.ts          # cliente para o servidor
     utils.ts             # utilitários compartilhados do design system
+  proxy.ts               # entrada do Proxy no Next.js 16
   types/
     database.ts          # tipos gerados a partir do schema Supabase
 supabase/
   config.toml            # configuração da stack local
   migrations/            # histórico versionado do PostgreSQL
+  templates/             # e-mails locais com token_hash para SSR
   tests/database/        # testes pgTAP de segurança e integridade
   seed.sql               # reservado a dados locais opcionais
 docs/
+  authentication.md      # fluxos, segurança e operação do Supabase Auth
   database.md            # decisões e operação do banco
 .github/workflows/
   ci.yml                 # validação web e PostgreSQL no GitHub Actions
@@ -184,13 +202,16 @@ para desenvolvimento; nunca serão inseridos automaticamente em produção. Cons
 A qualidade web e o banco são validados separadamente:
 
 ```bash
+npm test
 npm run check
 npm run db:reset
 npm run db:lint
 npm run db:test
 ```
 
-As três suítes pgTAP somam 58 asserções sobre provisionamento, isolamento entre
+Os testes Vitest cobrem validações de autenticação, limites, erros seguros,
+configuração da origem e prevenção de open redirect. As três suítes pgTAP somam
+58 asserções sobre provisionamento, isolamento entre
 usuários, referências cruzadas, arquivamento, privilégios, auditoria,
 transferências e saldos. A CI repete essas validações em PostgreSQL descartável.
 
@@ -209,6 +230,12 @@ transferências e saldos. A CI repete essas validações em PostgreSQL descartá
   relacionadas, sem entrar nos totais de receita ou despesa.
 - Toda tabela vinculada a usuário possui RLS. Filtros de frontend nunca serão
   tratados como barreira de segurança.
+- A sessão é validada com `getClaims()`, nunca autorizada por `getSession()`. O
+  Proxy é um filtro otimista; cada página e ação sensível repete a verificação.
+- Redirects de autenticação aceitam apenas caminhos internos e respostas que
+  alteram cookies não podem ser armazenadas em cache.
+- A recuperação de senha usa resposta neutra para não enumerar contas. Mensagens
+  brutas do Supabase, tokens e senhas não chegam à interface nem aos logs.
 - Não há ORM ou biblioteca de estado global nesta fase; ambos só serão adotados se
   uma necessidade concreta justificar.
 - O `package.json` sobrescreve somente o PostCSS interno do Next para a versão
@@ -223,7 +250,8 @@ transferências e saldos. A CI repete essas validações em PostgreSQL descartá
    documentação inicial.
 2. **Banco e segurança (concluída):** tabelas, constraints, índices, RLS,
    transferências, categorias padrão, testes e tipos gerados.
-3. **Autenticação:** cadastro, login, logout, recuperação, perfil e rotas privadas.
+3. **Autenticação (concluída):** cadastro, login, logout, confirmação,
+   recuperação, persistência de sessão e rotas privadas.
 4. **Layout:** sidebar, navegação mobile, cabeçalho, tema e estados compartilhados.
 5. **Contas e categorias:** CRUD, saldo inicial, categorias padrão e arquivamento.
 6. **Movimentações:** CRUD, filtros, paginação, status e transferências atômicas.
@@ -246,5 +274,6 @@ commits, pushes e pull requests.
 
 ## Próxima etapa
 
-Implementar a Etapa 3 em uma nova `feature/*`: cadastro, login, logout, recuperação
-de senha, atualização de perfil, proxy de sessão e proteção das rotas privadas.
+Implementar a Etapa 4 em uma nova `feature/*`: sidebar no desktop, navegação
+inferior no mobile, cabeçalho, tema claro/escuro, componentes compartilhados e
+estados de carregamento do shell autenticado.
