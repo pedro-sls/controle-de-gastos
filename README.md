@@ -7,11 +7,12 @@ até o fim do mês.
 
 ## Status do projeto
 
-As **Etapas 1, 2 e 3 estão concluídas**. O repositório contém a fundação web, o
-modelo PostgreSQL seguro e autenticação completa com Supabase Auth: cadastro,
-login, logout, confirmação de e-mail, recuperação e atualização de senha,
-persistência de sessão e proteção de rotas. O banco possui constraints, índices,
-RLS, transferências atômicas, 58 testes pgTAP e tipos TypeScript gerados.
+As **Etapas 1, 2, 3 e 4 estão concluídas**. O repositório contém a fundação web,
+o modelo PostgreSQL seguro, autenticação completa com Supabase Auth e o shell
+responsivo da área privada. Sidebar, navegação mobile, cabeçalho, tema persistente,
+rotas protegidas e estados compartilhados já estão prontos. O banco possui
+constraints, índices, RLS, transferências atômicas, 58 testes pgTAP e tipos
+TypeScript gerados.
 
 O banco foi validado apenas em ambientes descartáveis locais e de CI. Ainda não há
 projeto Supabase remoto vinculado nem deploy de produção.
@@ -26,6 +27,7 @@ Stack atual:
 - shadcn/ui com Base UI, variáveis CSS e Lucide Icons;
 - Supabase JavaScript e Supabase SSR;
 - React Hook Form e Zod;
+- next-themes para preferência clara, escura ou do sistema;
 - Supabase CLI, PostgreSQL 17 e pgTAP;
 - Vitest para regras executáveis no TypeScript;
 - GitHub Actions para qualidade web e validação do banco;
@@ -93,7 +95,8 @@ identidade novamente.
 O fluxo completo do banco, inclusive solução de problemas no Windows, está em
 [Banco de dados e segurança](docs/database.md). Cadastro, templates de e-mail,
 sessões e configuração remota estão em
-[Autenticação e sessões](docs/authentication.md).
+[Autenticação e sessões](docs/authentication.md). Layout, rotas privadas, tema e
+responsividade estão em [Shell autenticado](docs/application-shell.md).
 
 ## Execução local
 
@@ -144,16 +147,19 @@ os três valores configurados.
 src/
   app/
     (auth)/              # login, cadastro e recuperação de senha
-    (dashboard)/         # rotas privadas; dashboard mínimo da Etapa 3
+    (dashboard)/         # shell e rotas privadas responsivas
     auth/                # callbacks HTTP de confirmação e PKCE
     globals.css          # Tailwind e tokens visuais do shadcn/ui
     layout.tsx           # layout raiz, idioma e metadados
     page.tsx             # apresentação e entradas públicas
   components/
+    layout/              # sidebar, cabeçalho, navegação e estados reutilizáveis
+    providers/           # providers globais com fronteira Client Component
     ui/
       *.tsx              # componentes compartilhados do shadcn/ui
   config/
     app-url.ts           # validação da origem confiável
+    navigation.ts        # catálogo e correspondência das rotas privadas
     site.ts              # nome, localidade, moeda e fuso padrão
   features/
     auth/                # ações, schemas, formulários e testes de autenticação
@@ -165,6 +171,7 @@ src/
       proxy.ts           # refresh de cookies e claims
       server.ts          # cliente para o servidor
     utils.ts             # utilitários compartilhados do design system
+    theme.ts             # normalização e ciclo da preferência visual
   proxy.ts               # entrada do Proxy no Next.js 16
   types/
     database.ts          # tipos gerados a partir do schema Supabase
@@ -175,6 +182,7 @@ supabase/
   tests/database/        # testes pgTAP de segurança e integridade
   seed.sql               # reservado a dados locais opcionais
 docs/
+  application-shell.md   # layout, navegação, tema e validação responsiva
   authentication.md      # fluxos, segurança e operação do Supabase Auth
   database.md            # decisões e operação do banco
 .github/workflows/
@@ -209,8 +217,8 @@ npm run db:lint
 npm run db:test
 ```
 
-Os testes Vitest cobrem validações de autenticação, limites, erros seguros,
-configuração da origem e prevenção de open redirect. As três suítes pgTAP somam
+Os testes Vitest cobrem autenticação, limites, erros seguros, configuração da
+origem, prevenção de open redirect, navegação e tema. As três suítes pgTAP somam
 58 asserções sobre provisionamento, isolamento entre
 usuários, referências cruzadas, arquivamento, privilégios, auditoria,
 transferências e saldos. A CI repete essas validações em PostgreSQL descartável.
@@ -252,7 +260,8 @@ transferências e saldos. A CI repete essas validações em PostgreSQL descartá
    transferências, categorias padrão, testes e tipos gerados.
 3. **Autenticação (concluída):** cadastro, login, logout, confirmação,
    recuperação, persistência de sessão e rotas privadas.
-4. **Layout:** sidebar, navegação mobile, cabeçalho, tema e estados compartilhados.
+4. **Layout (concluída):** sidebar, navegação mobile, cabeçalho, tema e estados
+   compartilhados.
 5. **Contas e categorias:** CRUD, saldo inicial, categorias padrão e arquivamento.
 6. **Movimentações:** CRUD, filtros, paginação, status e transferências atômicas.
 7. **Dashboard:** totais, pendências, alertas, gráficos e gasto diário disponível.
@@ -274,6 +283,6 @@ commits, pushes e pull requests.
 
 ## Próxima etapa
 
-Implementar a Etapa 4 em uma nova `feature/*`: sidebar no desktop, navegação
-inferior no mobile, cabeçalho, tema claro/escuro, componentes compartilhados e
-estados de carregamento do shell autenticado.
+Implementar a Etapa 5 em uma nova `feature/*`: CRUD de contas e categorias,
+categorias padrão, saldo inicial e arquivamento sem quebrar referências
+históricas.
