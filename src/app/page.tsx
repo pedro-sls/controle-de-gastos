@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { ArrowRight, CheckCircle2, WalletCards } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   return (
@@ -17,7 +19,7 @@ export default function Home() {
             aria-hidden="true"
             className="size-4 text-emerald-600"
           />
-          Base técnica preparada
+          Etapas 1 a 3 concluídas
         </div>
 
         <div className="grid items-end gap-12 lg:grid-cols-[1.4fr_0.8fr]">
@@ -32,22 +34,45 @@ export default function Home() {
               Clareza para cuidar do seu dinheiro todos os dias.
             </h1>
             <p className="text-muted-foreground mt-6 max-w-2xl text-lg leading-8">
-              {siteConfig.description} A autenticação e o dashboard serão
-              implementados nas próximas etapas.
+              {siteConfig.description} Crie sua conta com segurança e comece a
+              preparar sua visão financeira.
             </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/cadastro"
+                className={cn(buttonVariants(), "h-11 px-5")}
+              >
+                Criar conta
+                <ArrowRight aria-hidden="true" data-icon="inline-end" />
+              </Link>
+              <Link
+                href="/entrar"
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "h-11 px-5",
+                )}
+              >
+                Já tenho uma conta
+              </Link>
+            </div>
           </div>
 
           <aside className="bg-card/90 rounded-3xl border p-6 shadow-xl shadow-black/5 backdrop-blur">
             <p className="text-sm font-medium">Etapa atual</p>
-            <p className="mt-2 text-2xl font-semibold">Preparação concluída</p>
-            <p className="text-muted-foreground mt-3 text-sm leading-6">
-              Next.js, TypeScript, Tailwind, shadcn/ui e os clientes Supabase já
-              fazem parte da fundação do projeto.
+            <p className="mt-2 text-2xl font-semibold">
+              Acesso seguro disponível
             </p>
-            <Button className="mt-6 w-full" disabled>
-              Acessar em breve
+            <p className="text-muted-foreground mt-3 text-sm leading-6">
+              Cadastro, login, recuperação de senha, renovação de sessão e
+              proteção de rotas já fazem parte do produto.
+            </p>
+            <Link
+              href="/dashboard"
+              className={cn(buttonVariants(), "mt-6 h-11 w-full")}
+            >
+              Acessar área protegida
               <ArrowRight aria-hidden="true" data-icon="inline-end" />
-            </Button>
+            </Link>
           </aside>
         </div>
       </section>

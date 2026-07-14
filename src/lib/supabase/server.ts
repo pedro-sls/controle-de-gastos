@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+import { shouldUseSecureAuthCookies } from "@/config/app-url";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import type { Database } from "@/types/database";
 
@@ -9,6 +10,9 @@ export async function createClient() {
   const { url, publishableKey } = getSupabaseEnv();
 
   return createServerClient<Database>(url, publishableKey, {
+    cookieOptions: {
+      secure: shouldUseSecureAuthCookies(),
+    },
     cookies: {
       getAll() {
         return cookieStore.getAll();
