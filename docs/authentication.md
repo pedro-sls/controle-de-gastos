@@ -6,18 +6,20 @@ Auth e Next.js 16.
 
 ## Fluxos disponíveis
 
-| Rota               | Finalidade                                      | Acesso                |
-| ------------------ | ----------------------------------------------- | --------------------- |
-| `/entrar`          | autenticar com e-mail e senha                   | somente visitante     |
-| `/cadastro`        | criar conta e solicitar confirmação do e-mail   | somente visitante     |
-| `/recuperar-senha` | solicitar link de recuperação                   | somente visitante     |
-| `/nova-senha`      | definir senha após validar o link               | sessão válida         |
-| `/auth/confirm`    | validar `token_hash` enviado nos e-mails        | Route Handler público |
-| `/auth/callback`   | trocar código PKCE por sessão como fallback     | Route Handler público |
-| `/dashboard`       | comprovar sessão e proteção da rota nesta etapa | usuário autenticado   |
+| Rota               | Finalidade                                    | Acesso                |
+| ------------------ | --------------------------------------------- | --------------------- |
+| `/entrar`          | autenticar com e-mail e senha                 | somente visitante     |
+| `/cadastro`        | criar conta e solicitar confirmação do e-mail | somente visitante     |
+| `/recuperar-senha` | solicitar link de recuperação                 | somente visitante     |
+| `/nova-senha`      | definir senha após validar o link             | sessão válida         |
+| `/auth/confirm`    | validar `token_hash` enviado nos e-mails      | Route Handler público |
+| `/auth/callback`   | trocar código PKCE por sessão como fallback   | Route Handler público |
+| `/dashboard`       | entrada do shell e visão geral protegida      | usuário autenticado   |
 
-O dashboard desta etapa é deliberadamente pequeno. Sidebar, navegação móvel,
-tema e o dashboard financeiro pertencem às Etapas 4 e 7.
+Sidebar, navegação móvel, cabeçalho e tema foram entregues na Etapa 4. O dashboard
+financeiro com cálculos e gráficos continua reservado à Etapa 7. Consulte
+[Shell autenticado](application-shell.md) para as demais rotas privadas e seus
+estados compartilhados.
 
 ## Arquitetura da sessão
 
