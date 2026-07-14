@@ -2,6 +2,7 @@ import { Geist } from "next/font/google";
 
 import type { Metadata } from "next";
 
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
@@ -26,8 +27,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang={siteConfig.locale} className={cn("font-sans", geist.variable)}>
-      <body className="min-h-screen antialiased">{children}</body>
+    <html
+      lang={siteConfig.locale}
+      className={cn("font-sans", geist.variable)}
+      suppressHydrationWarning
+    >
+      <body className="min-h-screen antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
