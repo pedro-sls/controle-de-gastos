@@ -5,10 +5,7 @@ import { MonitorCog, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
-
-const themeOrder = ["system", "light", "dark"] as const;
-
-type ThemeName = (typeof themeOrder)[number];
+import { getNextTheme, normalizeTheme, type ThemeName } from "@/lib/theme";
 
 const themeLabels: Record<ThemeName, string> = {
   dark: "escuro",
@@ -34,25 +31,18 @@ function useHasHydrated() {
   );
 }
 
-function normalizeTheme(theme?: string): ThemeName {
-  return themeOrder.includes(theme as ThemeName)
-    ? (theme as ThemeName)
-    : "system";
-}
-
 export function ThemeToggle() {
   const hasHydrated = useHasHydrated();
   const { setTheme, theme } = useTheme();
   const currentTheme = normalizeTheme(theme);
-  const currentIndex = themeOrder.indexOf(currentTheme);
-  const nextTheme = themeOrder[(currentIndex + 1) % themeOrder.length];
+  const nextTheme = getNextTheme(currentTheme);
   const Icon = themeIcons[currentTheme];
 
   return (
     <Button
       type="button"
       variant="outline"
-      className="h-10 gap-2 px-3"
+      className="h-11 gap-2 px-3"
       aria-label={`Tema atual ${themeLabels[currentTheme]}. Alterar para tema ${themeLabels[nextTheme]}.`}
       title={`Tema: ${themeLabels[currentTheme]}`}
       disabled={!hasHydrated}
