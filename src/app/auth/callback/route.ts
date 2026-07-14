@@ -1,20 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 import { getAppUrl } from "@/config/app-url";
 import { getSafeRedirectPath } from "@/features/auth/lib/safe-redirect";
+import { createNoStoreRedirect } from "@/lib/auth/redirect-response";
 import { createClient } from "@/lib/supabase/server";
-
-function noStoreRedirect(url: URL) {
-  const response = NextResponse.redirect(url, 303);
-  response.headers.set(
-    "Cache-Control",
-    "private, no-cache, no-store, must-revalidate, max-age=0",
-  );
-  response.headers.set("Pragma", "no-cache");
-  response.headers.set("Expires", "0");
-
-  return response;
-}
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
@@ -29,7 +18,7 @@ export async function GET(request: NextRequest) {
     const errorUrl = new URL(errorPath, appUrl);
     errorUrl.searchParams.set("status", "link-invalido");
 
-    return noStoreRedirect(errorUrl);
+    return createNoStoreRedirect(errorUrl);
   }
 
   const supabase = await createClient();
@@ -41,8 +30,8 @@ export async function GET(request: NextRequest) {
     const errorUrl = new URL(errorPath, appUrl);
     errorUrl.searchParams.set("status", "link-invalido");
 
-    return noStoreRedirect(errorUrl);
+    return createNoStoreRedirect(errorUrl);
   }
 
-  return noStoreRedirect(new URL(nextPath, appUrl));
+  return createNoStoreRedirect(new URL(nextPath, appUrl));
 }
