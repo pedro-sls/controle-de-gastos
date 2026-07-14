@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { shouldUseSecureAuthCookies } from "@/config/app-url";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import type { Database } from "@/types/database";
 
@@ -26,6 +27,9 @@ export async function refreshSession(
   const { url, publishableKey } = getSupabaseEnv();
 
   const supabase = createServerClient<Database>(url, publishableKey, {
+    cookieOptions: {
+      secure: shouldUseSecureAuthCookies(),
+    },
     cookies: {
       getAll() {
         return request.cookies.getAll();

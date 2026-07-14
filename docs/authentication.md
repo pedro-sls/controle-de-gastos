@@ -62,9 +62,11 @@ Esse é o fluxo SSR principal porque não depende do verificador PKCE estar no
 mesmo navegador. `/auth/callback` permanece como fallback para projetos que ainda
 usem o template padrão do Supabase e retornem um `code` PKCE.
 
-Depois de atualizar a senha, a sessão local é encerrada e o usuário entra
-novamente com a nova senha. Um link ausente, inválido ou expirado volta para uma
-tela segura com orientação para solicitar outro.
+Depois de atualizar a senha, os refresh tokens de todos os dispositivos são
+revogados e o usuário entra novamente com a nova senha. Access tokens já emitidos
+podem permanecer válidos até o prazo configurado pelo Supabase — uma hora na
+configuração local. Um link ausente, inválido ou expirado volta para uma tela
+segura com orientação para solicitar outro.
 
 ## Variáveis de ambiente
 
@@ -78,7 +80,8 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_local_publishable_key
 
 `NEXT_PUBLIC_APP_URL` deve conter somente a origem confiável, sem caminho,
 credenciais, query string ou fragmento. Ela é usada para construir destinos de
-e-mail sem confiar nos headers `Host` ou `Origin` recebidos.
+e-mail sem confiar nos headers `Host` ou `Origin` recebidos. Fora de `localhost`
+e `127.0.0.1`, HTTPS é obrigatório e os cookies de autenticação recebem `Secure`.
 
 A chave publicável é segura para o navegador quando o RLS está correto. Nunca
 adicione `service_role`, JWT secret, senha do banco ou chaves privadas a uma

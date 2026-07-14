@@ -21,6 +21,7 @@ describe("getAppUrl", () => {
 
   it.each([
     "javascript:alert(1)",
+    "http://meusaldo.example",
     "https://user:password@meusaldo.example",
     "https://meusaldo.example/subpath",
     "https://meusaldo.example?redirect=evil",

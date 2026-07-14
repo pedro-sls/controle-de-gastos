@@ -40,7 +40,21 @@ export function getSafeRedirectPath(
       return fallback;
     }
 
-    return `${url.pathname}${url.search}${url.hash}`;
+    const normalizedPath = `${url.pathname}${url.search}${url.hash}`;
+
+    // URL normaliza dot-segments, inclusive versões percent-encoded. O
+    // resultado precisa ser validado de novo porque pode passar a iniciar com
+    // `//` e ganhar semântica de URL externa no redirecionamento seguinte.
+    if (
+      !normalizedPath.startsWith("/") ||
+      normalizedPath.startsWith("//") ||
+      normalizedPath.includes("\\") ||
+      /[\u0000-\u001f\u007f]/u.test(normalizedPath)
+    ) {
+      return fallback;
+    }
+
+    return normalizedPath;
   } catch {
     return fallback;
   }

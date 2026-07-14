@@ -17,8 +17,17 @@ export function getAppUrl() {
     throw new Error(`${APP_URL_VARIABLE} deve conter uma URL válida.`);
   }
 
-  if (!(["http:", "https:"] as string[]).includes(url.protocol)) {
+  if (!["http:", "https:"].includes(url.protocol)) {
     throw new Error(`${APP_URL_VARIABLE} deve usar o protocolo HTTP ou HTTPS.`);
+  }
+
+  if (
+    url.protocol === "http:" &&
+    !["localhost", "127.0.0.1"].includes(url.hostname)
+  ) {
+    throw new Error(
+      `${APP_URL_VARIABLE} deve usar HTTPS fora do ambiente local.`,
+    );
   }
 
   if (
@@ -34,6 +43,10 @@ export function getAppUrl() {
   }
 
   return url.origin;
+}
+
+export function shouldUseSecureAuthCookies() {
+  return new URL(getAppUrl()).protocol === "https:";
 }
 
 export function getAuthCallbackUrl(nextPath: string) {

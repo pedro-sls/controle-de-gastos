@@ -17,6 +17,7 @@ describe("getSafeRedirectPath", () => {
     "/\\example.com",
     "/%5Cexample.com",
     "/%2F%2Fexample.com",
+    "/%2e%2e//example.com",
     "javascript:alert(1)",
     "data:text/html,conteudo",
     "/caminho\nmalicioso",
@@ -27,5 +28,15 @@ describe("getSafeRedirectPath", () => {
 
   it("usa o fallback quando o destino não foi informado", () => {
     expect(getSafeRedirectPath(null)).toBe("/dashboard");
+  });
+
+  it("rejeita dot-segments após a decodificação do query param", () => {
+    const url = new URL(
+      "https://meusaldo.example/callback?next=/%252e%252e//evil.example",
+    );
+
+    expect(getSafeRedirectPath(url.searchParams.get("next"), "/seguro")).toBe(
+      "/seguro",
+    );
   });
 });

@@ -205,7 +205,7 @@ export async function updatePasswordAction(
   let signOutError;
 
   try {
-    const result = await supabase.auth.signOut({ scope: "local" });
+    const result = await supabase.auth.signOut({ scope: "global" });
     signOutError = result.error;
   } catch {
     redirect("/dashboard?status=senha-alterada");
