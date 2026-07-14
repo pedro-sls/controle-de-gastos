@@ -11,7 +11,7 @@ As **Etapas 1, 2, 3 e 4 estão concluídas**. O repositório contém a fundaçã
 o modelo PostgreSQL seguro, autenticação completa com Supabase Auth e o shell
 responsivo da área privada. Sidebar, navegação mobile, cabeçalho, tema persistente,
 rotas protegidas e estados compartilhados já estão prontos. O banco possui
-constraints, índices, RLS, transferências atômicas, 58 testes pgTAP e tipos
+constraints, índices, RLS, transferências atômicas, 78 testes pgTAP e tipos
 TypeScript gerados.
 
 O banco foi validado apenas em ambientes descartáveis locais e de CI. Ainda não há
@@ -127,7 +127,7 @@ Acesse [http://localhost:3000](http://localhost:3000).
 | `npm run supabase:stop`   | encerra a stack Supabase local                   |
 | `npm run db:reset`        | recria o banco e reaplica migrations             |
 | `npm run db:lint`         | analisa funções e schema PostgreSQL              |
-| `npm run db:test`         | executa os 58 testes pgTAP                       |
+| `npm run db:test`         | executa os 78 testes pgTAP                       |
 | `npm run db:types`        | regenera e formata os tipos TypeScript do schema |
 
 ## Build de produção
@@ -218,8 +218,8 @@ npm run db:test
 ```
 
 Os testes Vitest cobrem autenticação, limites, erros seguros, configuração da
-origem, prevenção de open redirect, navegação e tema. As três suítes pgTAP somam
-58 asserções sobre provisionamento, isolamento entre
+origem, prevenção de open redirect, navegação e tema. As quatro suítes pgTAP somam
+78 asserções sobre provisionamento, isolamento entre
 usuários, referências cruzadas, arquivamento, privilégios, auditoria,
 transferências e saldos. A CI repete essas validações em PostgreSQL descartável.
 

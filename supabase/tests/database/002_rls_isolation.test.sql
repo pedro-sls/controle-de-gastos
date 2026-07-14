@@ -58,9 +58,8 @@ select is(
 
 select lives_ok(
   $$
-    insert into public.accounts (id, user_id, name, type)
+    insert into public.accounts (user_id, name, type)
     values (
-      '21000000-0000-0000-0000-000000000003',
       '20000000-0000-0000-0000-000000000001',
       'Second account A',
       'wallet'
@@ -123,7 +122,8 @@ select is(
 
 update public.accounts
 set archived_at = statement_timestamp()
-where id = '21000000-0000-0000-0000-000000000003';
+where user_id = '20000000-0000-0000-0000-000000000001'
+  and name = 'Second account A';
 
 select throws_ok(
   $$
@@ -140,7 +140,7 @@ select throws_ok(
     )
     select
       '20000000-0000-0000-0000-000000000001',
-      '21000000-0000-0000-0000-000000000003',
+      account.id,
       category.id,
       'Blocked archived account',
       10,
@@ -148,8 +148,11 @@ select throws_ok(
       current_date,
       'pending',
       'pix'
-    from public.categories as category
-    where category.user_id = '20000000-0000-0000-0000-000000000001'
+    from public.accounts as account
+    cross join public.categories as category
+    where account.user_id = '20000000-0000-0000-0000-000000000001'
+      and account.name = 'Second account A'
+      and category.user_id = account.user_id
       and category.type = 'expense'
     order by category.id
     limit 1
@@ -169,13 +172,14 @@ select is_empty(
   'user A cannot update an account owned by user B'
 );
 
-select is_empty(
+select throws_ok(
   $$
     delete from public.accounts
     where id = '21000000-0000-0000-0000-000000000002'
-    returning id
   $$,
-  'user A cannot delete an account owned by user B'
+  '42501',
+  null,
+  'authenticated users cannot permanently delete accounts'
 );
 
 select throws_ok(
@@ -188,14 +192,16 @@ select throws_ok(
       amount,
       transaction_date
     )
-    values (
+    select
       '20000000-0000-0000-0000-000000000001',
       '21000000-0000-0000-0000-000000000001',
-      '21000000-0000-0000-0000-000000000003',
+      account.id,
       'Blocked direct transfer',
       10,
       current_date
-    )
+    from public.accounts as account
+    where account.user_id = '20000000-0000-0000-0000-000000000001'
+      and account.name = 'Second account A'
   $$,
   '42501',
   null,
@@ -264,10 +270,7 @@ select is(
   (
     select count(*)
     from public.accounts
-    where id in (
-      '21000000-0000-0000-0000-000000000001',
-      '21000000-0000-0000-0000-000000000003'
-    )
+    where name in ('Account A', 'Second account A')
   ),
   0::bigint,
   'user B cannot see user A account identifiers'

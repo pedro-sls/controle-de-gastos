@@ -153,8 +153,10 @@ transações com rollback:
   referências cruzadas e registros arquivados;
 - `003_transfers.test.sql`: RPCs, duas pernas, saldos, atomicidade e bloqueio de
   adulteração.
+- `004_financial_dimensions.test.sql`: privilégios por coluna, arquivamento,
+  categorias padrão protegidas e saldo calculado das contas.
 
-A suíte atual possui 58 asserções:
+A suíte atual possui 78 asserções:
 
 ```bash
 npm run db:test
