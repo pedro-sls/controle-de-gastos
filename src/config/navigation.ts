@@ -41,6 +41,11 @@ const transactionsItem = {
   icon: ArrowLeftRight,
 } satisfies NavigationItem;
 
+const mobileTransactionsItem = {
+  ...transactionsItem,
+  exact: true,
+} satisfies NavigationItem;
+
 const newTransactionItem = {
   href: "/movimentacoes/nova",
   label: "Nova movimentação",
@@ -102,7 +107,7 @@ const moreItem = {
   exact: true,
 } satisfies NavigationItem;
 
-export const desktopNavigationItems = [
+export const desktopNavigationItems: readonly NavigationItem[] = [
   dashboardItem,
   transactionsItem,
   accountsItem,
@@ -111,23 +116,23 @@ export const desktopNavigationItems = [
   recurringItem,
   reportsItem,
   settingsItem,
-] as const satisfies readonly NavigationItem[];
+];
 
-export const mobileNavigationItems = [
+export const mobileNavigationItems: readonly NavigationItem[] = [
   dashboardItem,
-  transactionsItem,
+  mobileTransactionsItem,
   newTransactionItem,
   budgetsItem,
   moreItem,
-] as const satisfies readonly NavigationItem[];
+];
 
-export const moreNavigationItems = [
+export const moreNavigationItems: readonly NavigationItem[] = [
   accountsItem,
   categoriesItem,
   recurringItem,
   reportsItem,
   settingsItem,
-] as const satisfies readonly NavigationItem[];
+];
 
 export { newTransactionItem };
 
