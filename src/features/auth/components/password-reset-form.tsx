@@ -34,8 +34,6 @@ export function PasswordResetForm({ notice }: PasswordResetFormProps) {
   const onSubmit = form.handleSubmit((values) => {
     startTransition(() => dispatch(values));
   });
-  const isComplete = state.status === "success";
-
   return (
     <form className="space-y-5" noValidate onSubmit={onSubmit}>
       <AuthFormMessage message={notice} tone="error" />
@@ -53,14 +51,13 @@ export function PasswordResetForm({ notice }: PasswordResetFormProps) {
         error={
           form.formState.errors.email?.message ?? state.fieldErrors?.email?.[0]
         }
-        disabled={pending || isComplete}
+        disabled={pending}
         {...form.register("email")}
       />
       <AuthSubmitButton
         idleLabel="Enviar instruções"
         pending={pending}
         pendingLabel="Enviando…"
-        disabled={isComplete}
       />
     </form>
   );

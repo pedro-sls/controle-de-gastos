@@ -51,16 +51,26 @@ export function AuthField({
   hint,
   id,
   label,
+  required = true,
   ...props
 }: AuthFieldProps & { id: string }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id}>
+        {label}
+        {required ? (
+          <span aria-hidden="true" className="text-destructive">
+            *
+          </span>
+        ) : null}
+      </Label>
       <Input
         id={id}
         aria-describedby={getDescribedBy(id, error, hint)}
         aria-invalid={Boolean(error)}
+        aria-required={required}
         className={cn("h-11", className)}
+        required={required}
         {...props}
       />
       <FieldFeedback id={id} error={error} hint={hint} />
@@ -70,31 +80,44 @@ export function AuthField({
 
 export function PasswordField({
   className,
+  disabled,
   error,
   hint,
   id,
   label,
+  required = true,
   ...props
 }: AuthFieldProps & { id: string }) {
   const [isVisible, setIsVisible] = useState(false);
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id}>
+        {label}
+        {required ? (
+          <span aria-hidden="true" className="text-destructive">
+            *
+          </span>
+        ) : null}
+      </Label>
       <div className="relative">
         <Input
           id={id}
-          type={isVisible ? "text" : "password"}
+          type={isVisible && !disabled ? "text" : "password"}
           aria-describedby={getDescribedBy(id, error, hint)}
           aria-invalid={Boolean(error)}
+          aria-required={required}
           className={cn("h-11 pr-11", className)}
+          disabled={disabled}
+          required={required}
           {...props}
         />
         <button
           type="button"
           aria-label={isVisible ? "Ocultar senha" : "Mostrar senha"}
-          aria-pressed={isVisible}
-          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg outline-none focus-visible:ring-2"
+          aria-pressed={isVisible && !disabled}
+          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50"
+          disabled={disabled}
           onClick={() => setIsVisible((current) => !current)}
         >
           {isVisible ? (

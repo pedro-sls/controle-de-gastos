@@ -22,7 +22,10 @@ export function AuthSubmitButton({
       disabled={disabled || pending}
     >
       {pending ? (
-        <LoaderCircle aria-hidden="true" className="animate-spin" />
+        <LoaderCircle
+          aria-hidden="true"
+          className="animate-spin motion-reduce:animate-none"
+        />
       ) : null}
       {pending ? pendingLabel : idleLabel}
     </Button>

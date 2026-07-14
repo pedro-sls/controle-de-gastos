@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState } from "react";
+import { startTransition, useActionState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -33,6 +33,13 @@ export function SignupForm() {
     startTransition(() => dispatch(values));
   });
   const isComplete = state.status === "success";
+
+  useEffect(() => {
+    if (isComplete) {
+      form.setValue("password", "");
+      form.setValue("passwordConfirmation", "");
+    }
+  }, [form, isComplete]);
 
   return (
     <form className="space-y-5" noValidate onSubmit={onSubmit}>

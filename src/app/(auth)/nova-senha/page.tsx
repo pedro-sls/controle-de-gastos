@@ -15,7 +15,7 @@ export default async function UpdatePasswordPage() {
   return (
     <AuthCard
       title="Crie uma nova senha"
-      description="Escolha uma senha diferente, com pelo menos 8 caracteres. Depois, você entrará novamente."
+      description="Escolha uma senha com pelo menos 8 caracteres. Depois, você entrará novamente."
     >
       <UpdatePasswordForm />
     </AuthCard>

@@ -1,8 +1,7 @@
-import { CircleCheck, LogOut, ShieldCheck } from "lucide-react";
+import { CircleCheck, ShieldCheck } from "lucide-react";
 
 import type { Metadata } from "next";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { logoutAction } from "@/features/auth/actions";
 import { AuthFormMessage } from "@/features/auth/components/auth-form-message";
+import { LogoutButton } from "@/features/auth/components/logout-button";
 import { requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
@@ -46,14 +46,7 @@ export default async function DashboardPage({
             </h1>
           </div>
           <form action={logoutAction}>
-            <Button
-              type="submit"
-              variant="outline"
-              className="h-11 w-full sm:w-auto"
-            >
-              <LogOut aria-hidden="true" />
-              Sair
-            </Button>
+            <LogoutButton />
           </form>
         </header>
 
