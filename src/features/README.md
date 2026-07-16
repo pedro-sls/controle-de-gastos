@@ -12,12 +12,13 @@ features/
   auth/
   budgets/
   categories/
+  dashboard/
   finance/
   recurring/
   reports/
   transactions/
 ```
 
-`accounts`, `auth`, `categories`, `finance` e `transactions` já estão
+`accounts`, `auth`, `categories`, `dashboard`, `finance` e `transactions` já estão
 implementados. Os demais diretórios serão criados somente quando houver código,
 evitando pastas vazias e abstrações prematuras.

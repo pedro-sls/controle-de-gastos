@@ -18,8 +18,8 @@ autenticadas.
 - helpers puros e testados para correspondência de rotas e preferência de tema.
 
 Contas e categorias exibem dados reais desde a Etapa 5; movimentações, desde a
-Etapa 6. Dashboard financeiro, orçamentos, recorrências e relatórios permanecem
-como telas de estado vazio até as etapas definidas para cada domínio.
+Etapa 6; e o dashboard financeiro, desde a Etapa 7. Orçamentos, recorrências e
+relatórios permanecem como telas de estado vazio até as etapas de cada domínio.
 
 ## Arquitetura de renderização
 
@@ -39,7 +39,7 @@ renderizam seções internas, evitando landmarks principais aninhados.
 
 | Destino               | Desktop        | Celular    | Implementação funcional |
 | --------------------- | -------------- | ---------- | ----------------------- |
-| `/dashboard`          | sidebar        | Início     | Etapa 7                 |
+| `/dashboard`          | sidebar        | Início     | Etapa 7 (concluída)     |
 | `/movimentacoes`      | sidebar        | Movimentos | Etapa 6 (concluída)     |
 | `/movimentacoes/nova` | ação destacada | Novo       | Etapa 6 (concluída)     |
 | `/contas`             | sidebar        | Mais       | Etapa 5 (concluída)     |
@@ -126,6 +126,6 @@ redirecionamento.
 
 ## Evolução seguinte
 
-A Etapa 7 implementará o dashboard sobre o mesmo shell. O layout continuará sem
+A Etapa 8 implementará orçamentos sobre o mesmo shell. O layout continuará sem
 consultas de domínio; cada página carrega somente os dados do usuário necessários
 à rota.

@@ -17,7 +17,7 @@ Auth e Next.js 16.
 | `/dashboard`       | entrada do shell e visão geral protegida      | usuário autenticado   |
 
 Sidebar, navegação móvel, cabeçalho e tema foram entregues na Etapa 4. O dashboard
-financeiro com cálculos e gráficos continua reservado à Etapa 7. Consulte
+financeiro com cálculos e gráficos foi entregue na Etapa 7. Consulte
 [Shell autenticado](application-shell.md) para as demais rotas privadas e seus
 estados compartilhados.
 

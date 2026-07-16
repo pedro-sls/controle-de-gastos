@@ -646,6 +646,10 @@ export type Database = {
         Returns: string;
       };
       delete_transfer: { Args: { p_transfer_id: string }; Returns: undefined };
+      get_dashboard_snapshot: {
+        Args: { p_period_end: string; p_period_start: string };
+        Returns: Json;
+      };
       update_transfer: {
         Args: {
           p_amount: number;
