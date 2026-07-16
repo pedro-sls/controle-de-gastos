@@ -7,12 +7,12 @@ até o fim do mês.
 
 ## Status do projeto
 
-As **Etapas 1 a 6 estão concluídas**. Além da fundação web, banco seguro,
+As **Etapas 1 a 7 estão concluídas**. Além da fundação web, banco seguro,
 autenticação e shell responsivo, a área privada permite organizar contas,
-categorias, receitas, despesas e transferências. A listagem de movimentações tem
-filtros e paginação; saldos e vencimentos são derivados pelo banco. O PostgreSQL
-possui constraints, índices, RLS, transferências atômicas, 60 testes pgTAP e tipos
-TypeScript gerados.
+categorias, receitas, despesas e transferências. O dashboard apresenta totais,
+pendências, alertas, gráficos e uma estimativa conservadora de gasto diário. O
+PostgreSQL possui constraints, RLS, transferências atômicas, agregações seguras,
+73 testes pgTAP e tipos TypeScript gerados.
 
 O banco foi validado apenas em ambientes descartáveis locais e de CI. Ainda não há
 projeto Supabase remoto vinculado nem deploy de produção.
@@ -27,15 +27,15 @@ Stack atual:
 - shadcn/ui com Base UI, variáveis CSS e Lucide Icons;
 - Supabase JavaScript e Supabase SSR;
 - React Hook Form e Zod;
+- Recharts para visualizações financeiras acessíveis;
 - next-themes para preferência clara, escura ou do sistema;
 - Supabase CLI, PostgreSQL 17 e pgTAP;
 - Vitest para regras executáveis no TypeScript;
 - GitHub Actions para qualidade web e validação do banco;
 - ESLint e Prettier.
 
-Recharts continua previsto, mas será instalado somente na etapa que implementar
-gráficos. Regras atuais de data usam formatos ISO explícitos e APIs nativas,
-evitando dependências sem uso.
+Regras atuais de data usam formatos ISO explícitos e APIs nativas, evitando uma
+dependência adicional somente para cálculos já cobertos pelo domínio.
 
 ## Pré-requisitos
 
@@ -102,6 +102,8 @@ O CRUD financeiro entregue na Etapa 5 está detalhado em
 [Contas e categorias](docs/accounts-and-categories.md).
 Receitas, despesas, transferências e filtros estão em
 [Movimentações](docs/transactions.md).
+Totais, alertas, gráficos e gasto diário estão em
+[Dashboard financeiro](docs/dashboard.md).
 
 ## Execução local
 
@@ -132,7 +134,7 @@ Acesse [http://localhost:3000](http://localhost:3000).
 | `npm run supabase:stop`   | encerra a stack Supabase local                   |
 | `npm run db:reset`        | recria o banco e reaplica migrations             |
 | `npm run db:lint`         | analisa funções e schema PostgreSQL              |
-| `npm run db:test`         | executa os 60 testes pgTAP                       |
+| `npm run db:test`         | executa os 73 testes pgTAP                       |
 | `npm run db:types`        | regenera e formata os tipos TypeScript do schema |
 
 ## Build de produção
@@ -170,6 +172,7 @@ src/
     accounts/            # consultas, ações, schemas e formulários de contas
     auth/                # ações, schemas, formulários e testes de autenticação
     categories/          # consultas, ações, schemas e formulários de categorias
+    dashboard/           # agregações, período financeiro, gráficos e testes
     finance/             # campos e regras compartilhadas do domínio financeiro
     transactions/        # CRUD, filtros e transferências atômicas
   lib/
@@ -195,6 +198,7 @@ docs/
   application-shell.md   # layout, navegação, tema e validação responsiva
   authentication.md      # fluxos, segurança e operação do Supabase Auth
   database.md            # decisões e operação do banco
+  dashboard.md           # cálculos e experiência da visão geral
   transactions.md        # operação de receitas, despesas e transferências
 .github/workflows/
   ci.yml                 # validação web e PostgreSQL no GitHub Actions
@@ -228,13 +232,13 @@ npm run db:lint
 npm run db:test
 ```
 
-Os 83 testes Vitest cobrem autenticação, limites, erros seguros, configuração da
+Os 89 testes Vitest cobrem autenticação, limites, erros seguros, configuração da
 origem, prevenção de open redirect, navegação, tema, schemas, filtros, datas e
-valores monetários.
-As três suítes pgTAP somam 60 asserções sobre provisionamento, isolamento entre
+valores monetários, incluindo período financeiro e gasto diário seguro.
+As quatro suítes pgTAP somam 73 asserções sobre provisionamento, isolamento entre
 usuários, referências cruzadas, arquivamento, privilégios, auditoria,
-classificação de categorias, transferências e saldos. A CI repete essas validações
-em PostgreSQL descartável.
+classificação de categorias, transferências, saldos e agregações do dashboard. A
+CI repete essas validações em PostgreSQL descartável.
 
 ## Decisões arquiteturais
 
@@ -279,7 +283,8 @@ em PostgreSQL descartável.
    arquivamento.
 6. **Movimentações (concluída):** CRUD, filtros, paginação, status e
    transferências atômicas.
-7. **Dashboard:** totais, pendências, alertas, gráficos e gasto diário disponível.
+7. **Dashboard (concluída):** totais, pendências, alertas, gráficos e gasto diário
+   disponível.
 8. **Orçamentos:** limites gerais e por categoria, progresso e alertas.
 9. **Recorrências:** cadastro e geração idempotente de ocorrências.
 10. **Relatórios e configurações:** gráficos, comparativos e preferências do usuário.
@@ -298,5 +303,5 @@ commits, pushes e pull requests.
 
 ## Próxima etapa
 
-Implementar a Etapa 7: dashboard com totais, pendências, alertas, gráficos e
-estimativa segura de gasto diário disponível.
+Implementar a Etapa 8: orçamentos gerais e por categoria, progresso, faixas de
+alerta e comparação com os gastos pagos do período.

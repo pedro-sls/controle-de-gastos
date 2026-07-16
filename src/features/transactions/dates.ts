@@ -24,7 +24,7 @@ export function formatDate(value: string) {
   }).format(new Date(`${value}T00:00:00.000Z`));
 }
 
-export function getToday(timeZone = siteConfig.timeZone) {
+export function getToday(timeZone: string = siteConfig.timeZone) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
     month: "2-digit",
