@@ -17,9 +17,9 @@ autenticadas.
 - página `/mais`, que mantém todos os destinos acessíveis no celular;
 - helpers puros e testados para correspondência de rotas e preferência de tema.
 
-As páginas funcionais ainda não exibem dados financeiros fictícios. Contas,
-categorias, movimentações, dashboard financeiro, orçamentos, recorrências e
-relatórios serão implementados nas etapas definidas para cada domínio.
+Contas e categorias exibem dados reais do usuário desde a Etapa 5. Movimentações,
+dashboard financeiro, orçamentos, recorrências e relatórios permanecem como telas
+de estado vazio até as etapas definidas para cada domínio.
 
 ## Arquitetura de renderização
 
@@ -42,8 +42,8 @@ renderizam seções internas, evitando landmarks principais aninhados.
 | `/dashboard`          | sidebar        | Início     | Etapa 7                 |
 | `/movimentacoes`      | sidebar        | Movimentos | Etapa 6                 |
 | `/movimentacoes/nova` | ação destacada | Novo       | Etapa 6                 |
-| `/contas`             | sidebar        | Mais       | Etapa 5                 |
-| `/categorias`         | sidebar        | Mais       | Etapa 5                 |
+| `/contas`             | sidebar        | Mais       | Etapa 5 (concluída)     |
+| `/categorias`         | sidebar        | Mais       | Etapa 5 (concluída)     |
 | `/orcamentos`         | sidebar        | Orçamentos | Etapa 8                 |
 | `/recorrencias`       | sidebar        | Mais       | Etapa 9                 |
 | `/relatorios`         | sidebar        | Mais       | Etapa 10                |
@@ -124,8 +124,8 @@ Um smoke test sem sessão confirmou `/entrar` em `200` e `/dashboard`, `/mais` e
 `/movimentacoes/nova` em `303`, todos preservando um destino interno seguro no
 redirecionamento.
 
-## Próxima etapa
+## Evolução seguinte
 
-A Etapa 5 implementará contas e categorias sobre o modelo e as políticas RLS já
-versionados. O shell deve continuar sem consultas de domínio; cada página será
-responsável por carregar apenas os dados necessários.
+A Etapa 6 implementará movimentações sobre o mesmo shell. O layout continuará sem
+consultas de domínio; cada página carrega somente os dados do usuário necessários
+à rota.

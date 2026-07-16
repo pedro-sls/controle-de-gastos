@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(16);
+select plan(18);
 
 insert into auth.users (id, email)
 values
@@ -67,6 +67,39 @@ select lives_ok(
     )
   $$,
   'user A can create their own account'
+);
+
+select throws_ok(
+  $$
+    insert into public.categories (user_id, name, type, is_default)
+    values (
+      '20000000-0000-0000-0000-000000000001',
+      'Spoofed default',
+      'expense',
+      true
+    )
+  $$,
+  '42501',
+  null,
+  'authenticated users cannot mark custom categories as defaults'
+);
+
+select throws_ok(
+  $$
+    update public.categories
+    set type = 'income'
+    where id = (
+      select id
+      from public.categories
+      where user_id = '20000000-0000-0000-0000-000000000001'
+        and type = 'expense'
+      order by id
+      limit 1
+    )
+  $$,
+  '23514',
+  null,
+  'category type is immutable after creation'
 );
 
 select throws_ok(

@@ -19,7 +19,7 @@ export default function Home() {
             aria-hidden="true"
             className="size-4 text-emerald-600"
           />
-          Etapas 1 a 3 concluídas
+          Etapas 1 a 5 concluídas
         </div>
 
         <div className="grid items-end gap-12 lg:grid-cols-[1.4fr_0.8fr]">
@@ -60,11 +60,11 @@ export default function Home() {
           <aside className="bg-card/90 rounded-3xl border p-6 shadow-xl shadow-black/5 backdrop-blur">
             <p className="text-sm font-medium">Etapa atual</p>
             <p className="mt-2 text-2xl font-semibold">
-              Acesso seguro disponível
+              Contas e categorias disponíveis
             </p>
             <p className="text-muted-foreground mt-3 text-sm leading-6">
-              Cadastro, login, recuperação de senha, renovação de sessão e
-              proteção de rotas já fazem parte do produto.
+              A área protegida já permite organizar contas, saldo inicial e
+              categorias com edição e arquivamento seguros.
             </p>
             <Link
               href="/dashboard"
