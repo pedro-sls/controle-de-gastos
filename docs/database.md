@@ -4,6 +4,8 @@ A Etapa 2 estabelece o modelo PostgreSQL do MeuSaldo, suas regras de integridade
 políticas de Row Level Security (RLS), operações atômicas de transferência e testes
 automatizados. A migration inicial está em
 `supabase/migrations/20260713225410_initial_financial_schema.sql`.
+A proteção adicional da classificação das categorias está em
+`supabase/migrations/20260716024844_protect_category_classification.sql`.
 
 ## Execução local
 
@@ -103,6 +105,8 @@ As principais barreiras são:
 - validação de fuso horário;
 - bloqueio de novas referências a contas ou categorias arquivadas;
 - categorias removidas por arquivamento, sem `DELETE` para usuários autenticados;
+- tipo de categoria imutável depois da criação e flag de categoria padrão
+  controlada exclusivamente pelo banco;
 - views derivadas executadas com os privilégios do chamador.
 
 A exclusão de um usuário remove seu grafo financeiro. Relacionamentos históricos
@@ -150,11 +154,11 @@ transações com rollback:
 - `001_provisioning.test.sql`: estrutura, RLS, privilégios, provisionamento,
   categorias padrão, auditoria e exclusão do usuário;
 - `002_rls_isolation.test.sql`: isolamento entre dois usuários, acesso anônimo,
-  referências cruzadas e registros arquivados;
+  referências cruzadas, registros arquivados e classificação protegida;
 - `003_transfers.test.sql`: RPCs, duas pernas, saldos, atomicidade e bloqueio de
   adulteração.
 
-A suíte atual possui 58 asserções:
+A suíte atual possui 60 asserções:
 
 ```bash
 npm run db:test

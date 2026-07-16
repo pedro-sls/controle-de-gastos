@@ -7,11 +7,11 @@ até o fim do mês.
 
 ## Status do projeto
 
-As **Etapas 1, 2, 3 e 4 estão concluídas**. O repositório contém a fundação web,
-o modelo PostgreSQL seguro, autenticação completa com Supabase Auth e o shell
-responsivo da área privada. Sidebar, navegação mobile, cabeçalho, tema persistente,
-rotas protegidas e estados compartilhados já estão prontos. O banco possui
-constraints, índices, RLS, transferências atômicas, 58 testes pgTAP e tipos
+As **Etapas 1 a 5 estão concluídas**. Além da fundação web, banco seguro,
+autenticação e shell responsivo, a área privada já permite criar, editar, arquivar
+e reativar contas e categorias. Os saldos das contas são calculados pelo banco e
+as 18 categorias iniciais são provisionadas no cadastro. O banco possui
+constraints, índices, RLS, transferências atômicas, 60 testes pgTAP e tipos
 TypeScript gerados.
 
 O banco foi validado apenas em ambientes descartáveis locais e de CI. Ainda não há
@@ -97,6 +97,8 @@ O fluxo completo do banco, inclusive solução de problemas no Windows, está em
 sessões e configuração remota estão em
 [Autenticação e sessões](docs/authentication.md). Layout, rotas privadas, tema e
 responsividade estão em [Shell autenticado](docs/application-shell.md).
+O CRUD financeiro entregue na Etapa 5 está detalhado em
+[Contas e categorias](docs/accounts-and-categories.md).
 
 ## Execução local
 
@@ -127,7 +129,7 @@ Acesse [http://localhost:3000](http://localhost:3000).
 | `npm run supabase:stop`   | encerra a stack Supabase local                   |
 | `npm run db:reset`        | recria o banco e reaplica migrations             |
 | `npm run db:lint`         | analisa funções e schema PostgreSQL              |
-| `npm run db:test`         | executa os 58 testes pgTAP                       |
+| `npm run db:test`         | executa os 60 testes pgTAP                       |
 | `npm run db:types`        | regenera e formata os tipos TypeScript do schema |
 
 ## Build de produção
@@ -162,7 +164,10 @@ src/
     navigation.ts        # catálogo e correspondência das rotas privadas
     site.ts              # nome, localidade, moeda e fuso padrão
   features/
+    accounts/            # consultas, ações, schemas e formulários de contas
     auth/                # ações, schemas, formulários e testes de autenticação
+    categories/          # consultas, ações, schemas e formulários de categorias
+    finance/             # campos e regras compartilhadas do domínio financeiro
   lib/
     auth/                # identidade, gates e respostas sem cache
     supabase/
@@ -182,6 +187,7 @@ supabase/
   tests/database/        # testes pgTAP de segurança e integridade
   seed.sql               # reservado a dados locais opcionais
 docs/
+  accounts-and-categories.md # operação e segurança do CRUD financeiro
   application-shell.md   # layout, navegação, tema e validação responsiva
   authentication.md      # fluxos, segurança e operação do Supabase Auth
   database.md            # decisões e operação do banco
@@ -218,10 +224,11 @@ npm run db:test
 ```
 
 Os testes Vitest cobrem autenticação, limites, erros seguros, configuração da
-origem, prevenção de open redirect, navegação e tema. As três suítes pgTAP somam
-58 asserções sobre provisionamento, isolamento entre
+origem, prevenção de open redirect, navegação, tema, schemas e valores monetários.
+As três suítes pgTAP somam 60 asserções sobre provisionamento, isolamento entre
 usuários, referências cruzadas, arquivamento, privilégios, auditoria,
-transferências e saldos. A CI repete essas validações em PostgreSQL descartável.
+classificação de categorias, transferências e saldos. A CI repete essas validações
+em PostgreSQL descartável.
 
 ## Decisões arquiteturais
 
@@ -262,7 +269,8 @@ transferências e saldos. A CI repete essas validações em PostgreSQL descartá
    recuperação, persistência de sessão e rotas privadas.
 4. **Layout (concluída):** sidebar, navegação mobile, cabeçalho, tema e estados
    compartilhados.
-5. **Contas e categorias:** CRUD, saldo inicial, categorias padrão e arquivamento.
+5. **Contas e categorias (concluída):** CRUD, saldo inicial, categorias padrão e
+   arquivamento.
 6. **Movimentações:** CRUD, filtros, paginação, status e transferências atômicas.
 7. **Dashboard:** totais, pendências, alertas, gráficos e gasto diário disponível.
 8. **Orçamentos:** limites gerais e por categoria, progresso e alertas.
@@ -283,6 +291,5 @@ commits, pushes e pull requests.
 
 ## Próxima etapa
 
-Implementar a Etapa 5 em uma nova `feature/*`: CRUD de contas e categorias,
-categorias padrão, saldo inicial e arquivamento sem quebrar referências
-históricas.
+Implementar a Etapa 6: CRUD de movimentações, filtros, paginação, estados de
+pagamento e transferências atômicas entre contas.

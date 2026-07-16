@@ -1,10 +1,10 @@
 # Features
 
-As funcionalidades serão organizadas por domínio a partir das próximas etapas.
-Cada feature poderá conter seus próprios componentes, schemas, consultas, ações e
-tipos. As rotas em `src/app` ficarão responsáveis pela composição das telas.
+As funcionalidades são organizadas por domínio. Cada feature contém seus próprios
+componentes, schemas, consultas, ações e tipos; as rotas em `src/app` ficam
+responsáveis pela composição das telas.
 
-Estrutura prevista:
+Estrutura atual e prevista:
 
 ```text
 features/
@@ -12,10 +12,12 @@ features/
   auth/
   budgets/
   categories/
+  finance/
   recurring/
   reports/
   transactions/
 ```
 
-Diretórios serão criados somente quando houver implementação, evitando pastas
-vazias e abstrações prematuras.
+`accounts`, `auth`, `categories` e `finance` já estão implementados. Os demais
+diretórios serão criados somente quando houver código, evitando pastas vazias e
+abstrações prematuras.
