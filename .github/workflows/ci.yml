@@ -82,7 +82,24 @@ jobs:
         shell: bash
         run: |
           mkdir -p generated
-          npx supabase gen types typescript --local --schema public > generated/database.ts
+          types_file="$(mktemp)"
+          trap 'rm -f "$types_file"' EXIT
+
+          for attempt in 1 2 3; do
+            if npx supabase gen types typescript --local --schema public > "$types_file"; then
+              mv "$types_file" generated/database.ts
+              trap - EXIT
+              break
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              echo "Database type generation failed after $attempt attempts." >&2
+              exit 1
+            fi
+
+            echo "Database type generation failed; retrying in $((attempt * 15)) seconds..." >&2
+            sleep $((attempt * 15))
+          done
 
       - name: Upload generated types
         uses: actions/upload-artifact@v7

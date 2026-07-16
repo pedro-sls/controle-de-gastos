@@ -6,6 +6,8 @@ automatizados. A migration inicial está em
 `supabase/migrations/20260713225410_initial_financial_schema.sql`.
 A proteção adicional da classificação das categorias está em
 `supabase/migrations/20260716024844_protect_category_classification.sql`.
+As agregações autenticadas do dashboard estão em
+`supabase/migrations/20260716035000_dashboard_snapshot.sql`.
 
 ## Execução local
 
@@ -135,6 +137,16 @@ reassociar uma perna a outro agregado.
 Transferências afetam os saldos das contas, mas não entram nos totais de receita ou
 despesa.
 
+## Dashboard
+
+`get_dashboard_snapshot` recebe um período limitado a 63 dias e retorna somente
+agregados do usuário autenticado: saldo de contas ativas, receitas e despesas
+pagas, pendências, vencimentos, fluxo diário e despesas por categoria. A função
+filtra explicitamente por `auth.uid()` e não retorna linhas financeiras completas.
+
+Transferências não entram nos totais de receita e despesa nem são duplicadas nos
+gráficos. O fuso de `user_settings` determina vencimentos e próximos compromissos.
+
 ## Migrations e dados locais
 
 Enquanto a migration ainda não foi aplicada fora de ambientes descartáveis, ela
@@ -157,8 +169,10 @@ transações com rollback:
   referências cruzadas, registros arquivados e classificação protegida;
 - `003_transfers.test.sql`: RPCs, duas pernas, saldos, atomicidade e bloqueio de
   adulteração.
+- `004_dashboard.test.sql`: autenticação, isolamento, totais, pendências, séries e
+  validação do período.
 
-A suíte atual possui 60 asserções:
+A suíte atual possui 73 asserções:
 
 ```bash
 npm run db:test
