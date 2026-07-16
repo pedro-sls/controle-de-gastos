@@ -133,3 +133,42 @@ export function FinanceSelect({
     </FieldShell>
   );
 }
+
+type FinanceTextareaProps = ComponentProps<"textarea"> & {
+  error?: string;
+  hint?: string;
+  id: string;
+  label: string;
+};
+
+export function FinanceTextarea({
+  className,
+  error,
+  hint,
+  id,
+  label,
+  required = true,
+  ...props
+}: FinanceTextareaProps) {
+  return (
+    <FieldShell
+      id={id}
+      label={label}
+      error={error}
+      hint={hint}
+      required={required}
+    >
+      <textarea
+        id={id}
+        aria-describedby={describedBy(id, error, hint)}
+        aria-invalid={Boolean(error)}
+        className={cn(
+          "border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 min-h-28 w-full resize-y rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50",
+          className,
+        )}
+        required={required}
+        {...props}
+      />
+    </FieldShell>
+  );
+}

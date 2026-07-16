@@ -7,11 +7,11 @@ até o fim do mês.
 
 ## Status do projeto
 
-As **Etapas 1 a 5 estão concluídas**. Além da fundação web, banco seguro,
-autenticação e shell responsivo, a área privada já permite criar, editar, arquivar
-e reativar contas e categorias. Os saldos das contas são calculados pelo banco e
-as 18 categorias iniciais são provisionadas no cadastro. O banco possui
-constraints, índices, RLS, transferências atômicas, 60 testes pgTAP e tipos
+As **Etapas 1 a 6 estão concluídas**. Além da fundação web, banco seguro,
+autenticação e shell responsivo, a área privada permite organizar contas,
+categorias, receitas, despesas e transferências. A listagem de movimentações tem
+filtros e paginação; saldos e vencimentos são derivados pelo banco. O PostgreSQL
+possui constraints, índices, RLS, transferências atômicas, 60 testes pgTAP e tipos
 TypeScript gerados.
 
 O banco foi validado apenas em ambientes descartáveis locais e de CI. Ainda não há
@@ -33,8 +33,9 @@ Stack atual:
 - GitHub Actions para qualidade web e validação do banco;
 - ESLint e Prettier.
 
-Recharts e date-fns continuam previstos, mas serão instalados somente nas etapas
-que implementarem gráficos e regras de datas. Isso evita dependências sem uso.
+Recharts continua previsto, mas será instalado somente na etapa que implementar
+gráficos. Regras atuais de data usam formatos ISO explícitos e APIs nativas,
+evitando dependências sem uso.
 
 ## Pré-requisitos
 
@@ -99,6 +100,8 @@ sessões e configuração remota estão em
 responsividade estão em [Shell autenticado](docs/application-shell.md).
 O CRUD financeiro entregue na Etapa 5 está detalhado em
 [Contas e categorias](docs/accounts-and-categories.md).
+Receitas, despesas, transferências e filtros estão em
+[Movimentações](docs/transactions.md).
 
 ## Execução local
 
@@ -168,6 +171,7 @@ src/
     auth/                # ações, schemas, formulários e testes de autenticação
     categories/          # consultas, ações, schemas e formulários de categorias
     finance/             # campos e regras compartilhadas do domínio financeiro
+    transactions/        # CRUD, filtros e transferências atômicas
   lib/
     auth/                # identidade, gates e respostas sem cache
     supabase/
@@ -191,6 +195,7 @@ docs/
   application-shell.md   # layout, navegação, tema e validação responsiva
   authentication.md      # fluxos, segurança e operação do Supabase Auth
   database.md            # decisões e operação do banco
+  transactions.md        # operação de receitas, despesas e transferências
 .github/workflows/
   ci.yml                 # validação web e PostgreSQL no GitHub Actions
 ```
@@ -223,8 +228,9 @@ npm run db:lint
 npm run db:test
 ```
 
-Os testes Vitest cobrem autenticação, limites, erros seguros, configuração da
-origem, prevenção de open redirect, navegação, tema, schemas e valores monetários.
+Os 83 testes Vitest cobrem autenticação, limites, erros seguros, configuração da
+origem, prevenção de open redirect, navegação, tema, schemas, filtros, datas e
+valores monetários.
 As três suítes pgTAP somam 60 asserções sobre provisionamento, isolamento entre
 usuários, referências cruzadas, arquivamento, privilégios, auditoria,
 classificação de categorias, transferências e saldos. A CI repete essas validações
@@ -271,7 +277,8 @@ em PostgreSQL descartável.
    compartilhados.
 5. **Contas e categorias (concluída):** CRUD, saldo inicial, categorias padrão e
    arquivamento.
-6. **Movimentações:** CRUD, filtros, paginação, status e transferências atômicas.
+6. **Movimentações (concluída):** CRUD, filtros, paginação, status e
+   transferências atômicas.
 7. **Dashboard:** totais, pendências, alertas, gráficos e gasto diário disponível.
 8. **Orçamentos:** limites gerais e por categoria, progresso e alertas.
 9. **Recorrências:** cadastro e geração idempotente de ocorrências.
@@ -291,5 +298,5 @@ commits, pushes e pull requests.
 
 ## Próxima etapa
 
-Implementar a Etapa 6: CRUD de movimentações, filtros, paginação, estados de
-pagamento e transferências atômicas entre contas.
+Implementar a Etapa 7: dashboard com totais, pendências, alertas, gráficos e
+estimativa segura de gasto diário disponível.

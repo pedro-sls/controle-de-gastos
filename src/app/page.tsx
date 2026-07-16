@@ -19,7 +19,7 @@ export default function Home() {
             aria-hidden="true"
             className="size-4 text-emerald-600"
           />
-          Etapas 1 a 5 concluídas
+          Etapas 1 a 6 concluídas
         </div>
 
         <div className="grid items-end gap-12 lg:grid-cols-[1.4fr_0.8fr]">
@@ -60,11 +60,11 @@ export default function Home() {
           <aside className="bg-card/90 rounded-3xl border p-6 shadow-xl shadow-black/5 backdrop-blur">
             <p className="text-sm font-medium">Etapa atual</p>
             <p className="mt-2 text-2xl font-semibold">
-              Contas e categorias disponíveis
+              Movimentações disponíveis
             </p>
             <p className="text-muted-foreground mt-3 text-sm leading-6">
-              A área protegida já permite organizar contas, saldo inicial e
-              categorias com edição e arquivamento seguros.
+              Registre receitas, despesas e transferências, acompanhe
+              vencimentos e filtre o histórico com segurança.
             </p>
             <Link
               href="/dashboard"

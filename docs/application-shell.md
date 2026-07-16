@@ -17,9 +17,9 @@ autenticadas.
 - página `/mais`, que mantém todos os destinos acessíveis no celular;
 - helpers puros e testados para correspondência de rotas e preferência de tema.
 
-Contas e categorias exibem dados reais do usuário desde a Etapa 5. Movimentações,
-dashboard financeiro, orçamentos, recorrências e relatórios permanecem como telas
-de estado vazio até as etapas definidas para cada domínio.
+Contas e categorias exibem dados reais desde a Etapa 5; movimentações, desde a
+Etapa 6. Dashboard financeiro, orçamentos, recorrências e relatórios permanecem
+como telas de estado vazio até as etapas definidas para cada domínio.
 
 ## Arquitetura de renderização
 
@@ -40,8 +40,8 @@ renderizam seções internas, evitando landmarks principais aninhados.
 | Destino               | Desktop        | Celular    | Implementação funcional |
 | --------------------- | -------------- | ---------- | ----------------------- |
 | `/dashboard`          | sidebar        | Início     | Etapa 7                 |
-| `/movimentacoes`      | sidebar        | Movimentos | Etapa 6                 |
-| `/movimentacoes/nova` | ação destacada | Novo       | Etapa 6                 |
+| `/movimentacoes`      | sidebar        | Movimentos | Etapa 6 (concluída)     |
+| `/movimentacoes/nova` | ação destacada | Novo       | Etapa 6 (concluída)     |
 | `/contas`             | sidebar        | Mais       | Etapa 5 (concluída)     |
 | `/categorias`         | sidebar        | Mais       | Etapa 5 (concluída)     |
 | `/orcamentos`         | sidebar        | Orçamentos | Etapa 8                 |
@@ -126,6 +126,6 @@ redirecionamento.
 
 ## Evolução seguinte
 
-A Etapa 6 implementará movimentações sobre o mesmo shell. O layout continuará sem
+A Etapa 7 implementará o dashboard sobre o mesmo shell. O layout continuará sem
 consultas de domínio; cada página carrega somente os dados do usuário necessários
 à rota.
