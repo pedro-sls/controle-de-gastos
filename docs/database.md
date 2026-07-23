@@ -171,8 +171,12 @@ transações com rollback:
   adulteração.
 - `004_dashboard.test.sql`: autenticação, isolamento, totais, pendências, séries e
   validação do período.
+- `005_recurrences.test.sql`: geração ancorada no calendário, isolamento,
+  idempotência e limites de execução;
+- `006_reports.test.sql`: agregações comparativas, isolamento e preferências
+  atualizadas atomicamente.
 
-A suíte atual possui 73 asserções:
+A suíte atual possui 98 asserções:
 
 ```bash
 npm run db:test
