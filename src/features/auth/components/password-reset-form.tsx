@@ -14,6 +14,7 @@ import { initialAuthActionState } from "@/features/auth/types";
 import { AuthField } from "./auth-field";
 import { AuthFormMessage } from "./auth-form-message";
 import { AuthSubmitButton } from "./auth-submit-button";
+import { useAuthMessageFocus } from "./use-auth-message-focus";
 
 type PasswordResetFormProps = {
   notice?: string;
@@ -34,11 +35,19 @@ export function PasswordResetForm({ notice }: PasswordResetFormProps) {
   const onSubmit = form.handleSubmit((values) => {
     startTransition(() => dispatch(values));
   });
+  const messageRef = useAuthMessageFocus(state);
+
   return (
-    <form className="space-y-5" noValidate onSubmit={onSubmit}>
+    <form
+      action={dispatch}
+      className="space-y-5"
+      noValidate
+      onSubmit={onSubmit}
+    >
       <AuthFormMessage message={notice} tone="error" />
       <AuthFormMessage
         message={state.message}
+        messageRef={messageRef}
         tone={state.status === "error" ? "error" : "success"}
       />
       <AuthField

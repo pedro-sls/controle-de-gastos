@@ -42,6 +42,29 @@ type DashboardPageProps = {
   searchParams: Promise<{ status?: string | string[] }>;
 };
 
+const dashboardStatusMessages = {
+  "conta-criada": {
+    message: "Conta criada. Seu acesso já está ativo.",
+    tone: "success",
+  },
+  "email-confirmado": {
+    message: "E-mail confirmado. Sua conta está ativa e pronta para uso.",
+    tone: "success",
+  },
+  "entrada-concluida": {
+    message: "Login realizado. Que bom ter você de volta.",
+    tone: "success",
+  },
+  "erro-logout": {
+    message: "Não foi possível encerrar sua sessão. Tente novamente.",
+    tone: "error",
+  },
+  "senha-alterada": {
+    message: "Senha atualizada com sucesso.",
+    tone: "success",
+  },
+} as const;
+
 function summaryTone(value: number) {
   return value >= 0
     ? "text-emerald-700 dark:text-emerald-300"
@@ -58,6 +81,12 @@ export default async function DashboardPage({
   const normalizedStatus = Array.isArray(params.status)
     ? params.status[0]
     : params.status;
+  const statusMessage =
+    normalizedStatus && normalizedStatus in dashboardStatusMessages
+      ? dashboardStatusMessages[
+          normalizedStatus as keyof typeof dashboardStatusMessages
+        ]
+      : undefined;
   const { snapshot, period } = dashboard;
   const netResult = snapshot.paid_income - snapshot.paid_expense;
   const hasCashFlow = snapshot.paid_income > 0 || snapshot.paid_expense > 0;
@@ -93,14 +122,8 @@ export default async function DashboardPage({
 
       <div className="max-w-xl">
         <AuthFormMessage
-          message={
-            normalizedStatus === "erro-logout"
-              ? "Não foi possível encerrar sua sessão. Tente novamente."
-              : normalizedStatus === "senha-alterada"
-                ? "Senha atualizada com sucesso."
-                : undefined
-          }
-          tone={normalizedStatus === "erro-logout" ? "error" : "success"}
+          message={statusMessage?.message}
+          tone={statusMessage?.tone}
         />
       </div>
 

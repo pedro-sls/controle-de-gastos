@@ -14,7 +14,7 @@ export default function SignupPage() {
   return (
     <AuthCard
       title="Comece a organizar seu dinheiro"
-      description="Crie sua conta. Você receberá um e-mail para confirmar o acesso."
+      description="Crie sua conta e confirme o link enviado por e-mail. Não existe aprovação manual."
       footer={
         <p className="text-muted-foreground text-sm">
           Já tem uma conta?{" "}

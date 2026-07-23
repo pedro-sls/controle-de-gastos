@@ -5,13 +5,18 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { loginAction } from "@/features/auth/actions";
+import { Button } from "@/components/ui/button";
+import {
+  loginAction,
+  resendSignupConfirmationAction,
+} from "@/features/auth/actions";
 import { loginSchema, type LoginInput } from "@/features/auth/schemas";
 import { initialAuthActionState } from "@/features/auth/types";
 
 import { AuthField, PasswordField } from "./auth-field";
 import { AuthFormMessage } from "./auth-form-message";
 import { AuthSubmitButton } from "./auth-submit-button";
+import { useAuthMessageFocus } from "./use-auth-message-focus";
 
 type LoginFormProps = {
   nextPath: string;
@@ -29,6 +34,10 @@ export function LoginForm({
     action,
     initialAuthActionState,
   );
+  const [resendState, resendConfirmation, resendPending] = useActionState(
+    resendSignupConfirmationAction,
+    initialAuthActionState,
+  );
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
@@ -39,14 +48,50 @@ export function LoginForm({
   const onSubmit = form.handleSubmit((values) => {
     startTransition(() => dispatch(values));
   });
+  const messageRef = useAuthMessageFocus(state);
+  const resendMessageRef = useAuthMessageFocus(resendState);
+
+  function handleResendConfirmation() {
+    startTransition(() => {
+      resendConfirmation({ email: form.getValues("email") });
+    });
+  }
 
   return (
-    <form className="space-y-5" noValidate onSubmit={onSubmit}>
+    <form
+      action={dispatch}
+      className="space-y-5"
+      noValidate
+      onSubmit={onSubmit}
+    >
       <AuthFormMessage message={notice} tone={noticeTone} />
       <AuthFormMessage
         message={state.message}
+        messageRef={messageRef}
         tone={state.status === "error" ? "error" : "success"}
       />
+      {state.nextStep === "confirm-email" ? (
+        <div className="bg-muted/45 space-y-3 rounded-lg border p-4">
+          <p className="text-sm leading-6">
+            Não recebeu a mensagem? Peça outro link usando o mesmo e-mail
+            informado no formulário.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            disabled={pending || resendPending}
+            onClick={handleResendConfirmation}
+          >
+            {resendPending ? "Reenviando…" : "Reenviar confirmação"}
+          </Button>
+          <AuthFormMessage
+            message={resendState.message}
+            messageRef={resendMessageRef}
+            tone={resendState.status === "error" ? "error" : "success"}
+          />
+        </div>
+      ) : null}
       <AuthField
         id="email"
         type="email"

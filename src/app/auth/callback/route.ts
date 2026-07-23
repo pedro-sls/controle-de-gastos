@@ -1,7 +1,10 @@
 import type { NextRequest } from "next/server";
 
 import { getAppUrl } from "@/config/app-url";
-import { getSafeRedirectPath } from "@/features/auth/lib/safe-redirect";
+import {
+  addStatusToRedirectPath,
+  getSafeRedirectPath,
+} from "@/features/auth/lib/safe-redirect";
 import { createNoStoreRedirect } from "@/lib/auth/redirect-response";
 import { createClient } from "@/lib/supabase/server";
 
@@ -33,5 +36,10 @@ export async function GET(request: NextRequest) {
     return createNoStoreRedirect(errorUrl);
   }
 
-  return createNoStoreRedirect(new URL(nextPath, appUrl));
+  const successPath =
+    nextPath === "/nova-senha"
+      ? nextPath
+      : addStatusToRedirectPath(nextPath, "email-confirmado");
+
+  return createNoStoreRedirect(new URL(successPath, appUrl));
 }

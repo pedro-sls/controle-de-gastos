@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { getAuthErrorMessage, isAuthRateLimitError } from "../lib/auth-error";
+import {
+  getAuthErrorMessage,
+  isAuthRateLimitError,
+  isEmailNotConfirmedError,
+} from "../lib/auth-error";
 
 describe("getAuthErrorMessage", () => {
   it.each([
     [{ code: "invalid_credentials" }, "E-mail ou senha incorretos."],
-    [{ code: "email_not_confirmed" }, "Confirme seu e-mail antes de entrar."],
+    [
+      { code: "email_not_confirmed" },
+      "Sua conta foi criada, mas o e-mail ainda não foi confirmado. Abra a mensagem de confirmação antes de entrar.",
+    ],
     [
       { code: "over_email_send_rate_limit", status: 429 },
       "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
@@ -37,5 +44,14 @@ describe("getAuthErrorMessage", () => {
     );
     expect(isAuthRateLimitError({ status: 429 })).toBe(true);
     expect(isAuthRateLimitError({ code: "invalid_credentials" })).toBe(false);
+  });
+
+  it("identifica quando o próximo passo é confirmar o e-mail", () => {
+    expect(isEmailNotConfirmedError({ code: "email_not_confirmed" })).toBe(
+      true,
+    );
+    expect(isEmailNotConfirmedError({ code: "invalid_credentials" })).toBe(
+      false,
+    );
   });
 });

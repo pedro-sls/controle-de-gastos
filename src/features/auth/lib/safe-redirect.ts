@@ -59,3 +59,11 @@ export function getSafeRedirectPath(
     return fallback;
   }
 }
+
+export function addStatusToRedirectPath(path: string, status: string) {
+  const safePath = getSafeRedirectPath(path);
+  const url = new URL(safePath, INTERNAL_URL_ORIGIN);
+  url.searchParams.set("status", status);
+
+  return `${url.pathname}${url.search}${url.hash}`;
+}
