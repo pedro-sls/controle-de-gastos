@@ -50,15 +50,22 @@ provisiona, na mesma transação:
 - 18 categorias padrão.
 
 A aplicação não tenta duplicar esse provisionamento no frontend. Se a
-confirmação de e-mail estiver habilitada, a resposta orienta o usuário a abrir a
-mensagem. Se estiver desabilitada em outro ambiente, a sessão imediata também é
-tratada e leva ao dashboard.
+confirmação de e-mail estiver habilitada, o cadastro leva a uma orientação
+visível com os passos necessários e informa que não existe aprovação manual. Se
+estiver desabilitada em outro ambiente, a sessão imediata também é tratada e
+leva ao dashboard com uma confirmação de sucesso.
 
 ## Confirmação e recuperação por e-mail
 
 Os templates locais em `supabase/templates` criam links para `/auth/confirm` com
 um `token_hash`. O Route Handler chama `verifyOtp()`, grava a sessão em cookies e
-remove o token da URL ao redirecionar.
+remove o token da URL ao redirecionar. O dashboard confirma explicitamente que o
+e-mail foi validado e que a conta está ativa.
+
+Quando uma tentativa de login encontra uma conta ainda não confirmada, a
+interface explica o motivo e permite reenviar o link sem expor se outros
+endereços possuem cadastro. No ambiente local, a orientação de pós-cadastro
+oferece acesso direto ao Mailpit.
 
 Esse é o fluxo SSR principal porque não depende do verificador PKCE estar no
 mesmo navegador. `/auth/callback` permanece como fallback para projetos que ainda
@@ -113,6 +120,12 @@ O `supabase/config.toml` local mantém:
 - redirects restritos a `localhost:3000` e `127.0.0.1:3000`;
 - templates versionados de confirmação e recuperação.
 
+O Next.js libera os assets de desenvolvimento para `localhost`, `127.0.0.1` e
+os endereços IPv4 das interfaces locais. Isso permite testar pelo navegador da
+própria máquina ou por outro dispositivo da rede sem impedir a hidratação dos
+formulários. As invocações de Server Functions não são registradas no terminal,
+evitando que campos de senha apareçam nos logs de desenvolvimento.
+
 No Windows, Docker Desktop, WSL 2 e Virtual Machine Platform precisam estar
 ativos. Depois de habilitar recursos do Windows, reinicie o sistema antes de
 subir o Supabase. Consulte [Banco de dados e segurança](database.md) para o fluxo
@@ -137,9 +150,11 @@ padrão específico do provedor e da conta responsável.
 
 ## Validação e mensagens
 
-React Hook Form oferece validação e foco no navegador. Os mesmos schemas Zod são
-executados novamente nas Server Actions, pois qualquer cliente pode chamar essas
-ações diretamente.
+React Hook Form oferece validação e foco no navegador. Os formulários também
+declaram a Server Action em `action`, mantendo submissões `POST` seguras quando a
+hidratação ainda não terminou ou um asset de JavaScript fica indisponível. Os
+mesmos schemas Zod são executados novamente nas Server Actions, pois qualquer
+cliente pode chamar essas ações diretamente.
 
 Erros conhecidos são traduzidos para português. Mensagens brutas do provedor,
 senhas, tokens, códigos e respostas completas nunca são devolvidos ou
@@ -155,10 +170,12 @@ destino seguro.
 - envio pendente com botão desabilitado e texto de progresso;
 - erros de campo associados por `aria-describedby` e `aria-invalid`;
 - falha de credenciais e e-mail ainda não confirmado;
+- reenvio seguro da confirmação;
 - indisponibilidade do serviço ou da conexão;
 - sessão ausente ou expirada;
 - link inválido ou expirado;
-- cadastro, logout e senha atualizada com feedback;
+- cadastro, confirmação, login, logout e senha atualizada com feedback;
+- foco e rolagem até mensagens retornadas depois do envio;
 - skeletons durante navegação e fallback para erro inesperado.
 
 ## Verificações automatizadas

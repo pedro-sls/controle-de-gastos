@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useEffect } from "react";
+import { startTransition, useActionState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -11,6 +11,7 @@ import { initialAuthActionState } from "@/features/auth/types";
 import { AuthField, PasswordField } from "./auth-field";
 import { AuthFormMessage } from "./auth-form-message";
 import { AuthSubmitButton } from "./auth-submit-button";
+import { useAuthMessageFocus } from "./use-auth-message-focus";
 
 export function SignupForm() {
   const [state, dispatch, pending] = useActionState(
@@ -32,19 +33,18 @@ export function SignupForm() {
   const onSubmit = form.handleSubmit((values) => {
     startTransition(() => dispatch(values));
   });
-  const isComplete = state.status === "success";
-
-  useEffect(() => {
-    if (isComplete) {
-      form.setValue("password", "");
-      form.setValue("passwordConfirmation", "");
-    }
-  }, [form, isComplete]);
+  const messageRef = useAuthMessageFocus(state);
 
   return (
-    <form className="space-y-5" noValidate onSubmit={onSubmit}>
+    <form
+      action={dispatch}
+      className="space-y-5"
+      noValidate
+      onSubmit={onSubmit}
+    >
       <AuthFormMessage
         message={state.message}
+        messageRef={messageRef}
         tone={state.status === "error" ? "error" : "success"}
       />
       <AuthField
@@ -56,7 +56,7 @@ export function SignupForm() {
           form.formState.errors.fullName?.message ??
           state.fieldErrors?.fullName?.[0]
         }
-        disabled={pending || isComplete}
+        disabled={pending}
         {...form.register("fullName")}
       />
       <AuthField
@@ -69,7 +69,7 @@ export function SignupForm() {
         error={
           form.formState.errors.email?.message ?? state.fieldErrors?.email?.[0]
         }
-        disabled={pending || isComplete}
+        disabled={pending}
         {...form.register("email")}
       />
       <PasswordField
@@ -81,7 +81,7 @@ export function SignupForm() {
           form.formState.errors.password?.message ??
           state.fieldErrors?.password?.[0]
         }
-        disabled={pending || isComplete}
+        disabled={pending}
         {...form.register("password")}
       />
       <PasswordField
@@ -92,14 +92,13 @@ export function SignupForm() {
           form.formState.errors.passwordConfirmation?.message ??
           state.fieldErrors?.passwordConfirmation?.[0]
         }
-        disabled={pending || isComplete}
+        disabled={pending}
         {...form.register("passwordConfirmation")}
       />
       <AuthSubmitButton
         idleLabel="Criar conta"
         pending={pending}
         pendingLabel="Criando conta…"
-        disabled={isComplete}
       />
     </form>
   );

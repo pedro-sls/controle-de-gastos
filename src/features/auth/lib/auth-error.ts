@@ -7,6 +7,10 @@ type AuthErrorLike = {
   status?: number;
 };
 
+function getAuthErrorFingerprint(error: AuthErrorLike) {
+  return `${error.code ?? ""} ${error.message ?? ""}`.toLowerCase();
+}
+
 const defaultMessages: Record<AuthErrorContext, string> = {
   callback: "Este link é inválido ou expirou. Solicite um novo.",
   login: "Não foi possível entrar. Tente novamente.",
@@ -16,18 +20,20 @@ const defaultMessages: Record<AuthErrorContext, string> = {
 };
 
 export function isAuthRateLimitError(error: AuthErrorLike) {
-  const fingerprint =
-    `${error.code ?? ""} ${error.message ?? ""}`.toLowerCase();
+  const fingerprint = getAuthErrorFingerprint(error);
 
   return error.status === 429 || fingerprint.includes("rate_limit");
+}
+
+export function isEmailNotConfirmedError(error: AuthErrorLike) {
+  return getAuthErrorFingerprint(error).includes("email_not_confirmed");
 }
 
 export function getAuthErrorMessage(
   error: AuthErrorLike,
   context: AuthErrorContext,
 ) {
-  const fingerprint =
-    `${error.code ?? ""} ${error.message ?? ""}`.toLowerCase();
+  const fingerprint = getAuthErrorFingerprint(error);
 
   if (isAuthRateLimitError(error)) {
     return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
@@ -40,8 +46,8 @@ export function getAuthErrorMessage(
     return "E-mail ou senha incorretos.";
   }
 
-  if (fingerprint.includes("email_not_confirmed")) {
-    return "Confirme seu e-mail antes de entrar.";
+  if (isEmailNotConfirmedError(error)) {
+    return "Sua conta foi criada, mas o e-mail ainda não foi confirmado. Abra a mensagem de confirmação antes de entrar.";
   }
 
   if (

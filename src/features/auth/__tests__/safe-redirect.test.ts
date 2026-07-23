@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { getSafeRedirectPath } from "../lib/safe-redirect";
+import {
+  addStatusToRedirectPath,
+  getSafeRedirectPath,
+} from "../lib/safe-redirect";
 
 describe("getSafeRedirectPath", () => {
   it.each([
@@ -38,5 +41,28 @@ describe("getSafeRedirectPath", () => {
     expect(getSafeRedirectPath(url.searchParams.get("next"), "/seguro")).toBe(
       "/seguro",
     );
+  });
+});
+
+describe("addStatusToRedirectPath", () => {
+  it("adiciona o feedback preservando query string e fragmento", () => {
+    expect(
+      addStatusToRedirectPath(
+        "/dashboard?periodo=mes#resumo",
+        "entrada-concluida",
+      ),
+    ).toBe("/dashboard?periodo=mes&status=entrada-concluida#resumo");
+  });
+
+  it("substitui um status anterior sem duplicar o parâmetro", () => {
+    expect(
+      addStatusToRedirectPath("/dashboard?status=antigo", "email-confirmado"),
+    ).toBe("/dashboard?status=email-confirmado");
+  });
+
+  it("mantém um destino seguro ao receber um caminho externo", () => {
+    expect(
+      addStatusToRedirectPath("https://evil.example", "entrada-concluida"),
+    ).toBe("/dashboard?status=entrada-concluida");
   });
 });

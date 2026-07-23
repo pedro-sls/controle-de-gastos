@@ -14,6 +14,7 @@ import { initialAuthActionState } from "@/features/auth/types";
 import { PasswordField } from "./auth-field";
 import { AuthFormMessage } from "./auth-form-message";
 import { AuthSubmitButton } from "./auth-submit-button";
+import { useAuthMessageFocus } from "./use-auth-message-focus";
 
 export function UpdatePasswordForm() {
   const [state, dispatch, pending] = useActionState(
@@ -30,11 +31,18 @@ export function UpdatePasswordForm() {
   const onSubmit = form.handleSubmit((values) => {
     startTransition(() => dispatch(values));
   });
+  const messageRef = useAuthMessageFocus(state);
 
   return (
-    <form className="space-y-5" noValidate onSubmit={onSubmit}>
+    <form
+      action={dispatch}
+      className="space-y-5"
+      noValidate
+      onSubmit={onSubmit}
+    >
       <AuthFormMessage
         message={state.message}
+        messageRef={messageRef}
         tone={state.status === "error" ? "error" : "success"}
       />
       <PasswordField

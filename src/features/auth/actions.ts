@@ -7,9 +7,13 @@ import { getAuthCallbackUrl } from "@/config/app-url";
 import {
   getAuthConnectionErrorMessage,
   getAuthErrorMessage,
+  isEmailNotConfirmedError,
   isAuthRateLimitError,
 } from "@/features/auth/lib/auth-error";
-import { getSafeRedirectPath } from "@/features/auth/lib/safe-redirect";
+import {
+  addStatusToRedirectPath,
+  getSafeRedirectPath,
+} from "@/features/auth/lib/safe-redirect";
 import {
   loginSchema,
   passwordResetRequestSchema,
@@ -34,12 +38,67 @@ function getValidationErrorState(error: z.ZodError): AuthActionState {
   };
 }
 
+function readFormValue(formData: FormData, name: string) {
+  const value = formData.get(name);
+
+  return typeof value === "string" ? value : "";
+}
+
+function normalizeLoginInput(input: LoginInput | FormData): LoginInput {
+  if (!(input instanceof FormData)) {
+    return input;
+  }
+
+  return {
+    email: readFormValue(input, "email"),
+    password: readFormValue(input, "password"),
+  };
+}
+
+function normalizeSignupInput(input: SignupInput | FormData): SignupInput {
+  if (!(input instanceof FormData)) {
+    return input;
+  }
+
+  return {
+    fullName: readFormValue(input, "fullName"),
+    email: readFormValue(input, "email"),
+    password: readFormValue(input, "password"),
+    passwordConfirmation: readFormValue(input, "passwordConfirmation"),
+  };
+}
+
+function normalizePasswordResetInput(
+  input: PasswordResetRequestInput | FormData,
+): PasswordResetRequestInput {
+  if (!(input instanceof FormData)) {
+    return input;
+  }
+
+  return {
+    email: readFormValue(input, "email"),
+  };
+}
+
+function normalizePasswordUpdateInput(
+  input: PasswordUpdateInput | FormData,
+): PasswordUpdateInput {
+  if (!(input instanceof FormData)) {
+    return input;
+  }
+
+  return {
+    password: readFormValue(input, "password"),
+    passwordConfirmation: readFormValue(input, "passwordConfirmation"),
+  };
+}
+
 export async function loginAction(
   nextPath: string,
   _previousState: AuthActionState,
-  input: LoginInput,
+  input: LoginInput | FormData,
 ): Promise<AuthActionState> {
-  const parsedInput = loginSchema.safeParse(input);
+  const parsedInput = loginSchema.safeParse(normalizeLoginInput(input));
 
   if (!parsedInput.success) {
     return getValidationErrorState(parsedInput.error);
@@ -62,20 +121,25 @@ export async function loginAction(
   }
 
   if (authError) {
+    const needsEmailConfirmation = isEmailNotConfirmedError(authError);
+
     return {
       status: "error",
       message: getAuthErrorMessage(authError, "login"),
+      nextStep: needsEmailConfirmation ? "confirm-email" : undefined,
     };
   }
 
-  redirect(getSafeRedirectPath(nextPath));
+  redirect(
+    addStatusToRedirectPath(getSafeRedirectPath(nextPath), "entrada-concluida"),
+  );
 }
 
 export async function signupAction(
   _previousState: AuthActionState,
-  input: SignupInput,
+  input: SignupInput | FormData,
 ): Promise<AuthActionState> {
-  const parsedInput = signupSchema.safeParse(input);
+  const parsedInput = signupSchema.safeParse(normalizeSignupInput(input));
 
   if (!parsedInput.success) {
     return getValidationErrorState(parsedInput.error);
@@ -108,21 +172,65 @@ export async function signupAction(
   }
 
   if (authResult.data.session) {
-    redirect("/dashboard");
+    redirect("/dashboard?status=conta-criada");
   }
 
+  redirect("/entrar?status=confirmacao-pendente");
+}
+
+export async function resendSignupConfirmationAction(
+  _previousState: AuthActionState,
+  input: PasswordResetRequestInput | FormData,
+): Promise<AuthActionState> {
+  const parsedInput = passwordResetRequestSchema.safeParse(
+    normalizePasswordResetInput(input),
+  );
+
+  if (!parsedInput.success) {
+    return getValidationErrorState(parsedInput.error);
+  }
+
+  const supabase = await createClient();
+  let authError;
+
+  try {
+    const result = await supabase.auth.resend({
+      type: "signup",
+      email: parsedInput.data.email,
+      options: {
+        emailRedirectTo: getAuthCallbackUrl("/dashboard"),
+      },
+    });
+    authError = result.error;
+  } catch {
+    return {
+      status: "error",
+      message: getAuthConnectionErrorMessage(),
+    };
+  }
+
+  if (authError && isAuthRateLimitError(authError)) {
+    return {
+      status: "error",
+      message: getAuthErrorMessage(authError, "callback"),
+    };
+  }
+
+  // A resposta é neutra para não revelar se o e-mail possui uma conta.
   return {
     status: "success",
     message:
-      "Cadastro recebido. Confira seu e-mail para confirmar a conta e continuar.",
+      "Se a conta ainda estiver aguardando confirmação, enviamos um novo link. Confira também a caixa de spam.",
   };
 }
 
 export async function requestPasswordResetAction(
   _previousState: AuthActionState,
-  input: PasswordResetRequestInput,
+  input: PasswordResetRequestInput | FormData,
 ): Promise<AuthActionState> {
-  const parsedInput = passwordResetRequestSchema.safeParse(input);
+  const parsedInput = passwordResetRequestSchema.safeParse(
+    normalizePasswordResetInput(input),
+  );
 
   if (!parsedInput.success) {
     return getValidationErrorState(parsedInput.error);
@@ -163,9 +271,11 @@ export async function requestPasswordResetAction(
 
 export async function updatePasswordAction(
   _previousState: AuthActionState,
-  input: PasswordUpdateInput,
+  input: PasswordUpdateInput | FormData,
 ): Promise<AuthActionState> {
-  const parsedInput = passwordUpdateSchema.safeParse(input);
+  const parsedInput = passwordUpdateSchema.safeParse(
+    normalizePasswordUpdateInput(input),
+  );
 
   if (!parsedInput.success) {
     return getValidationErrorState(parsedInput.error);
