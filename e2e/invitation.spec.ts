@@ -83,7 +83,7 @@ test("convite confirma o e-mail e permite definir a senha", async ({
   const { data, error: inviteError } =
     await supabase.auth.admin.inviteUserByEmail(email, {
       data: { full_name: "Pessoa convidada" },
-      redirectTo: "http://127.0.0.1:3000/nova-senha",
+      redirectTo: "http://localhost:3000/nova-senha",
     });
 
   if (inviteError) throw inviteError;

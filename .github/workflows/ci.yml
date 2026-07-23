@@ -142,7 +142,7 @@ jobs:
         run: |
           eval "$(npx supabase status -o env)"
           {
-            echo "NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000"
+            echo "NEXT_PUBLIC_APP_URL=http://localhost:3000"
             echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}"
             echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}"
           } > .env.local
