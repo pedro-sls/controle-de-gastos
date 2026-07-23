@@ -52,10 +52,12 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const errorPath =
-    type === "recovery" || type === "invite" ? "/recuperar-senha" : "/entrar";
+  const errorPath = type === "recovery" ? "/recuperar-senha" : "/entrar";
   const errorUrl = new URL(errorPath, appUrl);
-  errorUrl.searchParams.set("status", "link-invalido");
+  errorUrl.searchParams.set(
+    "status",
+    type === "invite" ? "convite-invalido" : "link-invalido",
+  );
 
   return createNoStoreRedirect(errorUrl);
 }

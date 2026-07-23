@@ -7,16 +7,18 @@ até o fim do mês.
 
 ## Status do projeto
 
-As **Etapas 1 a 11 estão concluídas** e o MVP funcional está completo. A área
+As **Etapas 1 a 12 estão concluídas** e o MVP funcional está completo. A área
 privada permite organizar contas, categorias, movimentações, orçamentos e
 recorrências, além de apresentar dashboard, relatórios comparativos e
 preferências persistentes. O PostgreSQL possui constraints, RLS, operações
 atômicas, agregações seguras, 98 testes pgTAP e tipos TypeScript gerados. A
-interface possui 106 testes Vitest e 8 cenários Playwright em desktop e celular
+interface possui 123 testes Vitest e 10 cenários Playwright em desktop e celular
 com auditoria WCAG automatizada.
 
-O banco foi validado apenas em ambientes descartáveis locais e de CI. Ainda não há
-projeto Supabase remoto vinculado nem deploy de produção.
+O repositório possui preflight de produção, acesso por convite, healthcheck,
+imagem Docker e deploy protegido de migrations. Ainda não há projeto Supabase
+remoto vinculado, domínio, SMTP nem deploy ativo; esses recursos externos são os
+passos finais descritos em [Produção](docs/production.md).
 
 ## Tecnologias
 
@@ -78,6 +80,7 @@ Copie a URL e a chave pública exibidas para `.env.local`:
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_local_publishable_key
+REGISTRATION_MODE=open
 ```
 
 As três variáveis são públicas e não contêm segredos. `NEXT_PUBLIC_APP_URL` é a
@@ -122,38 +125,42 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 ## Comandos disponíveis
 
-| Comando                   | Finalidade                                       |
-| ------------------------- | ------------------------------------------------ |
-| `npm run dev`             | inicia o servidor de desenvolvimento             |
-| `npm run build`           | gera o build otimizado de produção               |
-| `npm start`               | serve um build já gerado                         |
-| `npm run lint`            | executa as regras do ESLint                      |
-| `npm run lint:fix`        | corrige automaticamente problemas seguros        |
-| `npm run typecheck`       | valida os tipos sem emitir arquivos              |
-| `npm test`                | executa os testes unitários uma vez              |
-| `npm run test:watch`      | executa testes unitários em modo interativo      |
-| `npm run test:e2e`        | valida navegador, mobile e acessibilidade        |
-| `npm run format`          | formata os arquivos com Prettier                 |
-| `npm run format:check`    | verifica a formatação sem alterar arquivos       |
-| `npm run check`           | executa formatação, lint, tipos, testes e build  |
-| `npm run supabase:start`  | inicia a stack Supabase local                    |
-| `npm run supabase:status` | exibe URLs e credenciais locais                  |
-| `npm run supabase:stop`   | encerra a stack Supabase local                   |
-| `npm run db:reset`        | recria o banco e reaplica migrations             |
-| `npm run db:lint`         | analisa funções e schema PostgreSQL              |
-| `npm run db:test`         | executa os 98 testes pgTAP                       |
-| `npm run db:types`        | regenera e formata os tipos TypeScript do schema |
+| Comando                    | Finalidade                                       |
+| -------------------------- | ------------------------------------------------ |
+| `npm run dev`              | inicia o servidor de desenvolvimento             |
+| `npm run build`            | gera o build otimizado de produção               |
+| `npm run build:production` | valida o ambiente e gera o build de produção     |
+| `npm start`                | serve um build já gerado                         |
+| `npm run lint`             | executa as regras do ESLint                      |
+| `npm run lint:fix`         | corrige automaticamente problemas seguros        |
+| `npm run typecheck`        | valida os tipos sem emitir arquivos              |
+| `npm test`                 | executa os testes unitários uma vez              |
+| `npm run test:watch`       | executa testes unitários em modo interativo      |
+| `npm run test:e2e`         | valida navegador, mobile e acessibilidade        |
+| `npm run format`           | formata os arquivos com Prettier                 |
+| `npm run format:check`     | verifica a formatação sem alterar arquivos       |
+| `npm run check`            | executa formatação, lint, tipos, testes e build  |
+| `npm run production:check` | valida URLs, chave e acesso do ambiente real     |
+| `npm run supabase:start`   | inicia a stack Supabase local                    |
+| `npm run supabase:status`  | exibe URLs e credenciais locais                  |
+| `npm run supabase:stop`    | encerra a stack Supabase local                   |
+| `npm run db:reset`         | recria o banco e reaplica migrations             |
+| `npm run db:lint`          | analisa funções e schema PostgreSQL              |
+| `npm run db:test`          | executa os 98 testes pgTAP                       |
+| `npm run db:types`         | regenera e formata os tipos TypeScript do schema |
 
 ## Build de produção
 
 ```bash
-npm run check
+npm run production:check
+npm run build:production
 npm start
 ```
 
-O build da aplicação não exige credenciais reais. As rotas que usam autenticação
-validam as variáveis no momento da requisição; a execução local e o deploy exigem
-os três valores configurados.
+O build comum continua aceitando o ambiente local. O build de produção exige
+origens HTTPS, chave `sb_publishable_*` e `REGISTRATION_MODE=invite_only`.
+Consulte [Produção](docs/production.md) para Supabase, SMTP, backups, plataforma
+gerenciada, Docker e checklist de lançamento.
 
 ## Estrutura atual
 
@@ -248,12 +255,12 @@ npm run db:lint
 npm run db:test
 ```
 
-Os 106 testes Vitest cobrem autenticação, limites, erros seguros, configuração da
+Os 123 testes Vitest cobrem autenticação, limites, erros seguros, configuração da
 origem, prevenção de open redirect, navegação, tema, schemas, filtros, datas e
 valores monetários, incluindo orçamento, recorrência, relatórios e gasto diário.
 As seis suítes pgTAP somam 98 asserções sobre provisionamento, isolamento,
 referências, privilégios, transferências, recorrências idempotentes e agregações.
-O Playwright executa 8 cenários em Chromium desktop e mobile, incluindo login,
+O Playwright executa 10 cenários em Chromium desktop e mobile, incluindo login,
 módulos finais, dados reais, 404, cabeçalhos e WCAG. A CI repete todas as
 validações em ambientes descartáveis.
 
@@ -308,6 +315,8 @@ validações em ambientes descartáveis.
     preferências do usuário.
 11. **Qualidade final (concluída):** testes financeiros, acessibilidade,
     responsividade, segurança e desempenho.
+12. **Preparação para produção (concluída):** acesso por convite, preflight de
+    ambiente, healthcheck, container, deploy protegido do banco e runbook.
 
 Cartões de crédito, metas com interface própria, integração bancária, Open Finance,
 OCR, OFX, compartilhamento familiar e aplicativo nativo permanecem fora do MVP.

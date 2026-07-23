@@ -5,10 +5,10 @@ A Etapa 11 fecha o roadmap funcional com verificações reproduzíveis.
 ## Camadas automatizadas
 
 - `npm audit --audit-level=moderate`: dependências conhecidas;
-- `npm run check`: Prettier, ESLint, TypeScript, 106 testes Vitest e build;
+- `npm run check`: Prettier, ESLint, TypeScript, 123 testes Vitest e build;
 - `npm run db:lint`: análise das funções e do schema;
 - `npm run db:test`: 98 asserções pgTAP em seis suítes;
-- `npm run test:e2e`: 8 cenários Playwright em Chromium desktop e mobile.
+- `npm run test:e2e`: 10 cenários Playwright em Chromium desktop e mobile.
 
 Os testes de navegador criam um usuário confirmado descartável e dados
 financeiros isolados. Eles validam login, módulos finais, valores reais, 404,
@@ -21,6 +21,8 @@ cabeçalhos de segurança e axe-core com WCAG 2 A, AA e 2.1 AA.
 - `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` e
   `Permissions-Policy`;
 - respostas de autenticação sem cache;
+- acesso de produção somente por convite, com bloqueio também na Server Action;
+- validação de URL e rejeição de chaves secretas na inicialização;
 - erros globais sem exposição de detalhes internos;
 - zero vulnerabilidades na auditoria da entrega.
 
@@ -33,3 +35,8 @@ erro recuperável, erro global e 404 acessível.
 
 A CI possui jobs independentes para web, banco e navegador e guarda traces e
 capturas somente quando um cenário falha.
+
+O endpoint `/api/health` permite verificar aplicação e Supabase sem expor
+configuração. O Dockerfile executa com usuário sem privilégios, saída standalone
+e healthcheck. O deploy remoto do banco exige execução manual no Environment
+protegido `production`.

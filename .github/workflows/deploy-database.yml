@@ -1,0 +1,79 @@
+name: Deploy production database
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: production-database
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start local PostgreSQL
+        run: npx supabase db start
+
+      - name: Replay migrations
+        run: npm run db:reset
+
+      - name: Lint database
+        run: npm run db:lint
+
+      - name: Test database
+        run: npm run db:test
+
+      - name: Stop local PostgreSQL
+        if: always()
+        run: npx supabase stop --no-backup
+
+  deploy:
+    name: Apply production migrations
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Link production project
+        run: npx supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Preview pending migrations
+        run: npx supabase db push --dry-run
+
+      - name: Apply pending migrations
+        run: npx supabase db push
