@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { getAuthCallbackUrl } from "@/config/app-url";
+import { isOpenRegistration } from "@/config/registration";
 import {
   getAuthConnectionErrorMessage,
   getAuthErrorMessage,
@@ -139,6 +140,14 @@ export async function signupAction(
   _previousState: AuthActionState,
   input: SignupInput | FormData,
 ): Promise<AuthActionState> {
+  if (!isOpenRegistration()) {
+    return {
+      status: "error",
+      message:
+        "Novos acessos são liberados somente por convite. Peça um convite ao responsável pelo MeuSaldo.",
+    };
+  }
+
   const parsedInput = signupSchema.safeParse(normalizeSignupInput(input));
 
   if (!parsedInput.success) {
