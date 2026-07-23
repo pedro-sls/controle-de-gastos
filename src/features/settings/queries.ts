@@ -38,6 +38,13 @@ export async function getUserSettings(): Promise<SettingsInput> {
 }
 
 export async function getThemePreference() {
-  const settings = await getUserSettings();
-  return settings.theme;
+  const identity = await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("user_settings")
+    .select("theme")
+    .eq("user_id", identity.id)
+    .single();
+  if (error) throw new Error("Não foi possível carregar o tema.");
+  return data.theme;
 }

@@ -91,7 +91,7 @@ begin
     'monthly', coalesce((
       select jsonb_agg(
         jsonb_build_object(
-          'month', month_series.month_start,
+          'month', month_series.month_start::date,
           'income', coalesce(grouped.income, 0),
           'expense', coalesce(grouped.expense, 0)
         )

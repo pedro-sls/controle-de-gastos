@@ -48,6 +48,7 @@ export function MonthlyReportChart({
   return (
     <div
       className="h-80 w-full"
+      role="img"
       aria-label="Evolução mensal de receitas e despesas"
     >
       <ResponsiveContainer width="100%" height="100%">
@@ -112,6 +113,7 @@ export function ReportCategoryChart({
   return (
     <div
       className="h-80 w-full"
+      role="img"
       aria-label="Distribuição de despesas por categoria"
     >
       <ResponsiveContainer width="100%" height="100%">
