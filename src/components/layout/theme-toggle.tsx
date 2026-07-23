@@ -1,10 +1,11 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { startTransition, useSyncExternalStore } from "react";
 import { MonitorCog, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
+import { updateThemePreferenceAction } from "@/features/settings/actions";
 import { getNextTheme, normalizeTheme, type ThemeName } from "@/lib/theme";
 
 const themeLabels: Record<ThemeName, string> = {
@@ -46,7 +47,12 @@ export function ThemeToggle() {
       aria-label={`Tema atual ${themeLabels[currentTheme]}. Alterar para tema ${themeLabels[nextTheme]}.`}
       title={`Tema: ${themeLabels[currentTheme]}`}
       disabled={!hasHydrated}
-      onClick={() => setTheme(nextTheme)}
+      onClick={() => {
+        setTheme(nextTheme);
+        startTransition(() => {
+          void updateThemePreferenceAction(nextTheme);
+        });
+      }}
     >
       <Icon aria-hidden="true" />
       <span className="hidden xl:inline">Tema {themeLabels[currentTheme]}</span>

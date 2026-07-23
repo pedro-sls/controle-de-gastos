@@ -654,6 +654,10 @@ export type Database = {
         Args: { p_period_end: string; p_period_start: string };
         Returns: Json;
       };
+      get_financial_report: {
+        Args: { p_period_end: string; p_period_start: string };
+        Returns: Json;
+      };
       update_transfer: {
         Args: {
           p_amount: number;
@@ -668,6 +672,18 @@ export type Database = {
           p_transfer_id: string;
         };
         Returns: string;
+      };
+      update_user_preferences: {
+        Args: {
+          p_currency_code: string;
+          p_date_format: string;
+          p_financial_month_start: number;
+          p_full_name: string;
+          p_locale: string;
+          p_theme: Database["public"]["Enums"]["theme_preference"];
+          p_timezone: string;
+        };
+        Returns: undefined;
       };
     };
     Enums: {
