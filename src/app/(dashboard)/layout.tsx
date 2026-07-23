@@ -1,14 +1,19 @@
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileNavigation } from "@/components/layout/app-navigation";
+import { ThemePreferenceSync } from "@/features/settings/components/theme-preference-sync";
+import { getThemePreference } from "@/features/settings/queries";
 
-export default function AuthenticatedLayout({
+export default async function AuthenticatedLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const theme = await getThemePreference();
+
   return (
     <div className="bg-muted/30 min-h-dvh lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+      <ThemePreferenceSync theme={theme} />
       <a
         href="#conteudo-principal"
         className="bg-background focus-visible:ring-ring fixed top-3 left-3 z-[100] -translate-y-24 rounded-lg px-4 py-3 font-medium shadow-lg transition-transform outline-none focus:translate-y-0 focus-visible:ring-3"

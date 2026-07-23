@@ -9,7 +9,7 @@ import {
 import { createNoStoreRedirect } from "@/lib/auth/redirect-response";
 import { createClient } from "@/lib/supabase/server";
 
-const ALLOWED_EMAIL_OTP_TYPES: EmailOtpType[] = ["email", "recovery"];
+const ALLOWED_EMAIL_OTP_TYPES: EmailOtpType[] = ["email", "invite", "recovery"];
 
 function isAllowedEmailOtpType(value: string | null): value is EmailOtpType {
   return Boolean(
@@ -20,7 +20,8 @@ function isAllowedEmailOtpType(value: string | null): value is EmailOtpType {
 export async function GET(request: NextRequest) {
   const tokenHash = request.nextUrl.searchParams.get("token_hash");
   const type = request.nextUrl.searchParams.get("type");
-  const fallback = type === "recovery" ? "/nova-senha" : "/dashboard";
+  const fallback =
+    type === "recovery" || type === "invite" ? "/nova-senha" : "/dashboard";
   const nextPath = getSafeRedirectPath(
     request.nextUrl.searchParams.get("next"),
     fallback,
@@ -35,10 +36,17 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error) {
-      const successPath =
-        type === "email"
-          ? addStatusToRedirectPath(nextPath, "email-confirmado")
-          : nextPath;
+      const successPath = (() => {
+        if (type === "email") {
+          return addStatusToRedirectPath(nextPath, "email-confirmado");
+        }
+
+        if (type === "invite") {
+          return addStatusToRedirectPath(nextPath, "convite-aceito");
+        }
+
+        return nextPath;
+      })();
 
       return createNoStoreRedirect(new URL(successPath, appUrl));
     }
@@ -46,7 +54,10 @@ export async function GET(request: NextRequest) {
 
   const errorPath = type === "recovery" ? "/recuperar-senha" : "/entrar";
   const errorUrl = new URL(errorPath, appUrl);
-  errorUrl.searchParams.set("status", "link-invalido");
+  errorUrl.searchParams.set(
+    "status",
+    type === "invite" ? "convite-invalido" : "link-invalido",
+  );
 
   return createNoStoreRedirect(errorUrl);
 }

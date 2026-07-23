@@ -43,6 +43,7 @@ export function CashFlowChart({ data }: { data: CashFlowPoint[] }) {
   return (
     <div
       className="h-72 w-full"
+      role="img"
       aria-label="Gráfico de receitas e despesas por dia"
     >
       <ResponsiveContainer width="100%" height="100%">
@@ -106,7 +107,11 @@ export function ExpenseCategoryChart({
   data: ExpenseCategoryPoint[];
 }) {
   return (
-    <div className="h-72 w-full" aria-label="Gráfico de despesas por categoria">
+    <div
+      className="h-72 w-full"
+      role="img"
+      aria-label="Gráfico de despesas por categoria"
+    >
       <ResponsiveContainer width="100%" height="100%">
         <PieChart accessibilityLayer>
           <Pie
