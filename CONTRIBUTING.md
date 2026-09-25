@@ -77,9 +77,11 @@ npm run check
 npm audit --audit-level=moderate
 ```
 
-Quando houver alterações no banco, execute também os comandos Supabase documentados
-no README. Nunca versione `.env.local`, tokens, chaves privadas, senhas ou a chave
-`service_role`.
+Quando houver alterações no banco, execute também `npm run db:reset`,
+`npm run db:lint` e `npm run db:test`. Se o schema público mudar, regenere os tipos
+com `npm run db:types`. O fluxo completo está em
+[Banco de dados e segurança](docs/database.md). Nunca versione `.env.local`, tokens,
+chaves privadas, senhas ou a chave `service_role`.
 
 ## Pull requests
 

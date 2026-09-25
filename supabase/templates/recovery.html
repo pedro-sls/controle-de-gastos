@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="pt-BR">
+  <body
+    style="font-family: Arial, sans-serif; color: #17211b; line-height: 1.6"
+  >
+    <h2>Crie uma nova senha para o MeuSaldo</h2>
+    <p>Recebemos uma solicitação para redefinir a senha da sua conta.</p>
+    <p>
+      <a
+        href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/nova-senha"
+        >Criar nova senha</a
+      >
+    </p>
+    <p>Se você não fez esta solicitação, ignore esta mensagem.</p>
+  </body>
+</html>

@@ -1,0 +1,175 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=moderate
+
+      - name: Validate application
+        run: npm run check
+
+  database:
+    name: Database quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start local PostgreSQL
+        run: npx supabase db start
+
+      - name: Replay migrations
+        run: npm run db:reset
+
+      - name: Lint database
+        run: npm run db:lint
+
+      - name: Run database tests
+        shell: bash
+        run: |
+          if find supabase/tests/database -type f -name '*.sql' -print -quit 2>/dev/null | grep -q .; then
+            npm run db:test
+          else
+            echo "No database tests found yet."
+          fi
+
+      - name: Generate database types
+        shell: bash
+        run: |
+          mkdir -p generated
+          types_file="$(mktemp)"
+          trap 'rm -f "$types_file"' EXIT
+
+          for attempt in 1 2 3; do
+            if npx supabase gen types typescript --local --schema public > "$types_file"; then
+              mv "$types_file" generated/database.ts
+              trap - EXIT
+              break
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              echo "Database type generation failed after $attempt attempts." >&2
+              exit 1
+            fi
+
+            echo "Database type generation failed; retrying in $((attempt * 15)) seconds..." >&2
+            sleep $((attempt * 15))
+          done
+
+      - name: Upload generated types
+        uses: actions/upload-artifact@v7
+        with:
+          name: database-types
+          path: generated/database.ts
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stop local PostgreSQL
+        if: always()
+        run: npx supabase stop --no-backup
+
+  browser:
+    name: Browser and accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start local Supabase
+        run: npx supabase start
+
+      - name: Configure local application
+        shell: bash
+        run: |
+          eval "$(npx supabase status -o env)"
+          {
+            echo "NEXT_PUBLIC_APP_URL=http://localhost:3000"
+            echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}"
+          } > .env.local
+
+      - name: Run browser and accessibility tests
+        run: npm run test:e2e
+
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Stop local Supabase
+        if: always()
+        run: npx supabase stop --no-backup

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR">
+  <body
+    style="font-family: Arial, sans-serif; color: #17211b; line-height: 1.6"
+  >
+    <h2>Confirme sua conta no MeuSaldo</h2>
+    <p>
+      Falta apenas confirmar seu e-mail para começar a organizar suas finanças.
+    </p>
+    <p>
+      <a
+        href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard"
+        >Confirmar minha conta</a
+      >
+    </p>
+    <p>Se você não criou esta conta, ignore esta mensagem.</p>
+  </body>
+</html>
