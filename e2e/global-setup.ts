@@ -71,7 +71,16 @@ export default async function globalSetup() {
   });
   if (accountError) throw accountError;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const todayParts = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "America/Fortaleza",
+  }).formatToParts(new Date());
+  const todayValues = Object.fromEntries(
+    todayParts.map((part) => [part.type, part.value]),
+  );
+  const today = `${todayValues.year}-${todayValues.month}-${todayValues.day}`;
   const month = `${today.slice(0, 7)}-01`;
   const { error: transactionError } = await supabase
     .from("transactions")
