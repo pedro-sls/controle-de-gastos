@@ -50,10 +50,6 @@ export default function RootLayout({
       className={cn("font-sans", geist.variable)}
       suppressHydrationWarning
     >
-      <head>
-        <meta name="theme-color" content="#09090b" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      </head>
       <body className="min-h-screen antialiased">
         <ThemeProvider
           attribute="class"
