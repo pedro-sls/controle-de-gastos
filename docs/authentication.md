@@ -6,15 +6,15 @@ Auth e Next.js 16.
 
 ## Fluxos disponíveis
 
-| Rota               | Finalidade                                    | Acesso                |
-| ------------------ | --------------------------------------------- | --------------------- |
-| `/entrar`          | autenticar com e-mail e senha                 | somente visitante     |
-| `/cadastro`        | criar conta e solicitar confirmação do e-mail | somente visitante     |
-| `/recuperar-senha` | solicitar link de recuperação                 | somente visitante     |
-| `/nova-senha`      | definir senha após validar o link             | sessão válida         |
-| `/auth/confirm`    | validar `token_hash` enviado nos e-mails      | Route Handler público |
-| `/auth/callback`   | trocar código PKCE por sessão como fallback   | Route Handler público |
-| `/dashboard`       | entrada do shell e visão geral protegida      | usuário autenticado   |
+| Rota               | Finalidade                                   | Acesso                |
+| ------------------ | -------------------------------------------- | --------------------- |
+| `/entrar`          | autenticar com e-mail e senha                | somente visitante     |
+| `/cadastro`        | criar conta localmente ou explicar o convite | somente visitante     |
+| `/recuperar-senha` | solicitar link de recuperação                | somente visitante     |
+| `/nova-senha`      | definir senha após validar o link            | sessão válida         |
+| `/auth/confirm`    | validar `token_hash` enviado nos e-mails     | Route Handler público |
+| `/auth/callback`   | trocar código PKCE por sessão como fallback  | Route Handler público |
+| `/dashboard`       | entrada do shell e visão geral protegida     | usuário autenticado   |
 
 Sidebar, navegação móvel, cabeçalho e tema foram entregues na Etapa 4. O dashboard
 financeiro com cálculos e gráficos foi entregue na Etapa 7. Consulte
@@ -49,18 +49,20 @@ provisiona, na mesma transação:
 - `user_settings`;
 - 18 categorias padrão.
 
-A aplicação não tenta duplicar esse provisionamento no frontend. Se a
-confirmação de e-mail estiver habilitada, o cadastro leva a uma orientação
-visível com os passos necessários e informa que não existe aprovação manual. Se
-estiver desabilitada em outro ambiente, a sessão imediata também é tratada e
-leva ao dashboard com uma confirmação de sucesso.
+A aplicação não tenta duplicar esse provisionamento no frontend. Em
+desenvolvimento, `REGISTRATION_MODE=open` permite criar uma conta e confirmar o
+próprio e-mail. Em produção, o padrão seguro é `invite_only`: a página explica
+que o cadastro público está fechado e a Server Action recusa chamadas diretas.
+O provedor de e-mail do Supabase também deve ter novos cadastros desativados,
+pois o bloqueio da interface não substitui a configuração do serviço.
 
 ## Confirmação e recuperação por e-mail
 
 Os templates locais em `supabase/templates` criam links para `/auth/confirm` com
 um `token_hash`. O Route Handler chama `verifyOtp()`, grava a sessão em cookies e
 remove o token da URL ao redirecionar. O dashboard confirma explicitamente que o
-e-mail foi validado e que a conta está ativa.
+e-mail foi validado e que a conta está ativa. Convites usam o tipo `invite`,
+abrem `/nova-senha` e exigem que o destinatário defina a própria senha.
 
 Quando uma tentativa de login encontra uma conta ainda não confirmada, a
 interface explica o motivo e permite reenviar o link sem expor se outros
@@ -85,6 +87,7 @@ Copie `.env.example` para `.env.local` e configure:
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_local_publishable_key
+REGISTRATION_MODE=open
 ```
 
 `NEXT_PUBLIC_APP_URL` deve conter somente a origem confiável, sem caminho,
@@ -139,14 +142,17 @@ Antes de homologação ou produção:
 2. defina a Site URL do Supabase como a origem oficial HTTPS da aplicação;
 3. autorize a URL oficial `/auth/callback` nos Redirect URLs;
 4. mantenha confirmação de e-mail e troca segura de senha habilitadas;
-5. copie os conteúdos de `supabase/templates/confirmation.html` e
-   `supabase/templates/recovery.html` para os respectivos templates no painel;
-6. configure `NEXT_PUBLIC_APP_URL`, URL e chave publicável no ambiente de deploy;
-7. use SMTP próprio, desative rastreamento de links no provedor e avalie CAPTCHA
-   antes de abrir cadastros públicos.
+5. copie os conteúdos de `supabase/templates/confirmation.html`,
+   `supabase/templates/recovery.html` e `supabase/templates/invite.html` para os
+   respectivos templates no painel;
+6. desative novos cadastros no provedor de e-mail e use convites administrativos;
+7. configure `NEXT_PUBLIC_APP_URL`, URL, chave publicável e
+   `REGISTRATION_MODE=invite_only` no ambiente de deploy;
+8. use SMTP próprio e desative rastreamento de links no provedor.
 
 Não use wildcard amplo no domínio de produção. Para previews, autorize apenas o
 padrão específico do provedor e da conta responsável.
+O procedimento completo está em [Produção](production.md).
 
 ## Validação e mensagens
 
@@ -196,6 +202,7 @@ Handlers e Proxy em conjunto.
 Quando o Supabase estiver em execução, valide em um navegador limpo:
 
 - [ ] cadastro e recebimento do e-mail no Mailpit;
+- [ ] convite, criação da senha e primeiro login;
 - [ ] confirmação cria sessão e abre `/dashboard`;
 - [ ] perfil, configurações e 18 categorias foram provisionados;
 - [ ] login correto e credenciais incorretas;

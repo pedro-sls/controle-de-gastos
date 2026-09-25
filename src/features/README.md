@@ -14,11 +14,10 @@ features/
   categories/
   dashboard/
   finance/
-  recurring/
+  recurrences/
   reports/
   transactions/
 ```
 
-`accounts`, `auth`, `categories`, `dashboard`, `finance` e `transactions` já estão
-implementados. Os demais diretórios serão criados somente quando houver código,
-evitando pastas vazias e abstrações prematuras.
+Todos os domínios listados estão implementados. Novos diretórios serão criados
+somente quando houver código, evitando pastas vazias e abstrações prematuras.

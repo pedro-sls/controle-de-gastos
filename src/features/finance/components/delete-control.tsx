@@ -20,11 +20,13 @@ export function DeleteControl({
   action,
   entryKind,
   id,
+  itemKind = "movimentação",
   itemName,
 }: {
   action: DeleteAction;
   entryKind: string;
   id: string;
+  itemKind?: string;
   itemName: string;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -73,7 +75,7 @@ export function DeleteControl({
                 id={`delete-title-${id}`}
                 className="mt-2 text-xl font-semibold"
               >
-                Excluir movimentação?
+                Excluir {itemKind}?
               </h2>
             </div>
             <Button
@@ -92,8 +94,10 @@ export function DeleteControl({
             id={`delete-description-${id}`}
             className="text-muted-foreground mt-4 leading-7"
           >
-            “{itemName}” será removida permanentemente. Se for uma
-            transferência, as duas contas serão atualizadas de forma atômica.
+            “{itemName}” será removido permanentemente.
+            {entryKind === "transfer"
+              ? " As duas contas serão atualizadas de forma atômica."
+              : ""}
           </p>
 
           <div className="mt-4">

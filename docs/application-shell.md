@@ -17,15 +17,15 @@ autenticadas.
 - página `/mais`, que mantém todos os destinos acessíveis no celular;
 - helpers puros e testados para correspondência de rotas e preferência de tema.
 
-Contas e categorias exibem dados reais desde a Etapa 5; movimentações, desde a
-Etapa 6; e o dashboard financeiro, desde a Etapa 7. Orçamentos, recorrências e
-relatórios permanecem como telas de estado vazio até as etapas de cada domínio.
+Contas, categorias, movimentações, dashboard, orçamentos, recorrências,
+relatórios e configurações exibem dados reais. Não restam placeholders
+funcionais no shell do MVP.
 
 ## Arquitetura de renderização
 
-O layout em `src/app/(dashboard)/layout.tsx` é síncrono. Ele não consulta cookies
-nem carrega a identidade, portanto sidebar, cabeçalho e navegação mobile podem
-ser renderizados imediatamente enquanto a página solicitada está pendente.
+O layout em `src/app/(dashboard)/layout.tsx` carrega somente a preferência de
+tema autenticada. O restante dos dados permanece em cada página, evitando
+waterfalls de domínio no shell.
 
 Cada página privada chama `requireUser()` no servidor. O Proxy também redireciona
 visitantes, mas é apenas a primeira barreira: a autorização não depende do
@@ -44,10 +44,10 @@ renderizam seções internas, evitando landmarks principais aninhados.
 | `/movimentacoes/nova` | ação destacada | Novo       | Etapa 6 (concluída)     |
 | `/contas`             | sidebar        | Mais       | Etapa 5 (concluída)     |
 | `/categorias`         | sidebar        | Mais       | Etapa 5 (concluída)     |
-| `/orcamentos`         | sidebar        | Orçamentos | Etapa 8                 |
-| `/recorrencias`       | sidebar        | Mais       | Etapa 9                 |
-| `/relatorios`         | sidebar        | Mais       | Etapa 10                |
-| `/configuracoes`      | sidebar        | Mais       | evolução incremental    |
+| `/orcamentos`         | sidebar        | Orçamentos | Etapa 8 (concluída)     |
+| `/recorrencias`       | sidebar        | Mais       | Etapa 9 (concluída)     |
+| `/relatorios`         | sidebar        | Mais       | Etapa 10 (concluída)    |
+| `/configuracoes`      | sidebar        | Mais       | Etapa 10 (concluída)    |
 | `/mais`               | —              | Mais       | Etapa 4                 |
 
 O catálogo central fica em `src/config/navigation.ts`. A correspondência exige
@@ -71,9 +71,8 @@ a página atual.
 ## Tema
 
 `next-themes` aplica a classe `light` ou `dark` ao elemento `html`. A preferência
-inicial é `system`; o botão no cabeçalho percorre a sequência sistema, claro e
-escuro. A biblioteca persiste a escolha no armazenamento local e acompanha a
-preferência do sistema enquanto esse modo estiver selecionado.
+inicial vem de `user_settings`; o botão percorre sistema, claro e escuro e
+persiste a escolha no PostgreSQL e no armazenamento local.
 
 O layout raiz usa `suppressHydrationWarning` somente no elemento alterado pela
 biblioteca. O botão permanece desabilitado até a hidratação, usando
@@ -84,9 +83,9 @@ biblioteca. O botão permanece desabilitado até a hidratação, usando
 `src/app/(dashboard)/loading.tsx` mantém o shell visível e apresenta um skeleton
 sem valores financeiros simulados. `error.tsx` registra apenas o `digest` do erro
 inesperado e oferece tanto a tentativa do Next.js 16 com `unstable_retry` quanto
-um retorno seguro ao dashboard. Como o boundary pertence ao mesmo segmento, ele
-recupera falhas das páginas, mas não uma falha do próprio layout; o layout é
-deliberadamente síncrono e estrutural para reduzir essa superfície.
+um retorno seguro ao dashboard. `global-error.tsx` protege também falhas acima
+desse segmento, e `not-found.tsx` oferece recuperação acessível para endereços
+desconhecidos.
 
 ## Execução e validação local
 
@@ -113,6 +112,7 @@ As verificações automatizadas são:
 ```bash
 npm test
 npm run check
+npm run test:e2e
 npm audit --audit-level=moderate
 ```
 
@@ -120,12 +120,6 @@ Os testes Vitest cobrem o ciclo de tema, normalização de valores, rotas exatas
 subrotas, colisões de prefixo, títulos de página e invariantes do catálogo. O
 build de produção valida também as fronteiras entre Server e Client Components.
 
-Um smoke test sem sessão confirmou `/entrar` em `200` e `/dashboard`, `/mais` e
-`/movimentacoes/nova` em `303`, todos preservando um destino interno seguro no
-redirecionamento.
-
-## Evolução seguinte
-
-A Etapa 8 implementará orçamentos sobre o mesmo shell. O layout continuará sem
-consultas de domínio; cada página carrega somente os dados do usuário necessários
-à rota.
+Os cenários Playwright verificam o shell autenticado em Chromium desktop e
+mobile, executam axe-core com critérios WCAG 2 A/AA e confirmam os
+redirecionamentos de sessão.

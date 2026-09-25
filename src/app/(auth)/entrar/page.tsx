@@ -26,6 +26,11 @@ const notices = {
     message: "Este link é inválido ou expirou. Solicite um novo.",
     tone: "error",
   },
+  "convite-invalido": {
+    message:
+      "Este convite é inválido ou expirou. Peça ao responsável para enviar um novo convite.",
+    tone: "error",
+  },
   "senha-alterada": {
     message: "Senha atualizada. Entre novamente com a nova senha.",
     tone: "success",

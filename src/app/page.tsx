@@ -19,7 +19,7 @@ export default function Home() {
             aria-hidden="true"
             className="size-4 text-emerald-600"
           />
-          Etapas 1 a 7 concluídas
+          MVP funcional concluído
         </div>
 
         <div className="grid items-end gap-12 lg:grid-cols-[1.4fr_0.8fr]">
@@ -58,13 +58,13 @@ export default function Home() {
           </div>
 
           <aside className="bg-card/90 rounded-3xl border p-6 shadow-xl shadow-black/5 backdrop-blur">
-            <p className="text-sm font-medium">Etapa atual</p>
+            <p className="text-sm font-medium">Aplicação completa</p>
             <p className="mt-2 text-2xl font-semibold">
-              Dashboard financeiro disponível
+              Controle financeiro de ponta a ponta
             </p>
             <p className="text-muted-foreground mt-3 text-sm leading-6">
-              Acompanhe saldos, pendências, alertas, gráficos e quanto ainda
-              pode gastar por dia com uma estimativa conservadora.
+              Organize contas, lançamentos, orçamentos e recorrências; acompanhe
+              alertas, relatórios e quanto ainda pode gastar por dia.
             </p>
             <Link
               href="/dashboard"

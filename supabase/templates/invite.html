@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR">
+  <body
+    style="font-family: Arial, sans-serif; color: #17211b; line-height: 1.6"
+  >
+    <h2>Você recebeu um convite para o MeuSaldo</h2>
+    <p>
+      Seu e-mail foi convidado para acessar o MeuSaldo. Confirme o convite e
+      defina uma senha pessoal para começar.
+    </p>
+    <p>
+      <a
+        href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite&next=/nova-senha"
+        >Aceitar convite e criar senha</a
+      >
+    </p>
+    <p>Se você não esperava este convite, ignore esta mensagem.</p>
+  </body>
+</html>
